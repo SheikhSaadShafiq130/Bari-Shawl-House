@@ -1,0 +1,143 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Reusable Hardened Helpers
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isBootstrapOwner() {
+      return isVerifiedUser() && request.auth.token.email == 'skyblue249249@gmail.com';
+    }
+
+    function isAdmin() {
+      return isBootstrapOwner() || (isVerifiedUser() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    // 3. Entity Validation Blueprints
+    function isValidProduct(data) {
+      return data.keys().hasAll([
+          'id', 'code', 'name', 'nameUrdu', 'category', 'price',
+          'material', 'style', 'color', 'colorHex', 'inStock',
+          'featured', 'isNew', 'dimensions', 'description',
+          'descriptionUrdu', 'care', 'origin', 'patternType',
+          'wholesaleAvailable', 'wholesaleMinQty', 'ownerId',
+          'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'id', 'code', 'name', 'nameUrdu', 'category', 'price',
+          'originalPrice', 'material', 'style', 'color', 'colorHex',
+          'inStock', 'featured', 'isNew', 'dimensions', 'description',
+          'descriptionUrdu', 'care', 'origin', 'patternType', 'image',
+          'wholesaleAvailable', 'wholesaleMinQty', 'ownerId',
+          'createdAt', 'updatedAt'
+        ])
+        && isValidId(data.id)
+        && data.code is string && data.code.size() >= 1 && data.code.size() <= 50
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 200
+        && data.nameUrdu is string && data.nameUrdu.size() <= 200
+        && data.category is string && data.category in ['gents', 'ladies', 'bechgana', 'rumaal', 'laungi']
+        && data.price is number && data.price >= 0 && data.price <= 10000000
+        && (!('originalPrice' in data) || (data.originalPrice is number && data.originalPrice >= 0 && data.originalPrice <= 10000000))
+        && data.material is string && data.material.size() >= 1 && data.material.size() <= 100
+        && data.style is string && data.style.size() >= 1 && data.style.size() <= 150
+        && data.color is string && data.color.size() >= 1 && data.color.size() <= 100
+        && data.colorHex is string && data.colorHex.size() >= 4 && data.colorHex.size() <= 20
+        && data.inStock is bool
+        && data.featured is bool
+        && data.isNew is bool
+        && data.dimensions is string && data.dimensions.size() >= 1 && data.dimensions.size() <= 100
+        && data.description is string && data.description.size() >= 1 && data.description.size() <= 1000
+        && data.descriptionUrdu is string && data.descriptionUrdu.size() <= 1000
+        && data.care is string && data.care.size() >= 1 && data.care.size() <= 300
+        && data.origin is string && data.origin.size() >= 1 && data.origin.size() <= 150
+        && data.patternType is string && data.patternType in ['kashmiri', 'paisley', 'herringbone', 'geometric', 'royal-velvet', 'laungi-stripe']
+        && (!('image' in data) || (data.image is string && data.image.size() <= 850000))
+        && data.wholesaleAvailable is bool
+        && data.wholesaleMinQty is number && data.wholesaleMinQty >= 1 && data.wholesaleMinQty <= 10000
+        && data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 && data.ownerId == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidAdminRecord(data) {
+      return data.keys().hasAll(['email', 'createdAt'])
+        && data.keys().hasOnly(['email', 'createdAt'])
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 200
+        && data.createdAt is timestamp;
+    }
+
+    // 4. Collection Rules: /products/{productId}
+    match /products/{productId} {
+      // Storefront visitors can view individual valid products and list catalog products with valid prices
+      allow get: if isValidId(productId);
+      allow list: if existing().price >= 0;
+
+      // Only the verified Shop Owner (Admin) can create, update, or delete products
+      allow create: if isSignedIn()
+        && isValidId(productId)
+        && isValidProduct(incoming())
+        && incoming().id == productId
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && isAdmin();
+
+      allow update: if isSignedIn()
+        && isValidId(productId)
+        && isValidProduct(incoming())
+        && incoming().id == existing().id
+        && incoming().ownerId == existing().ownerId
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'code', 'name', 'nameUrdu', 'category', 'price', 'originalPrice',
+          'material', 'style', 'color', 'colorHex', 'inStock', 'featured',
+          'isNew', 'dimensions', 'description', 'descriptionUrdu', 'care',
+          'origin', 'patternType', 'image', 'wholesaleAvailable',
+          'wholesaleMinQty', 'updatedAt'
+        ])
+        && isAdmin();
+
+      allow delete: if isSignedIn()
+        && isValidId(productId)
+        && isAdmin();
+    }
+
+    // 5. Collection Rules: /admins/{adminUid}
+    match /admins/{adminUid} {
+      allow get: if isSignedIn() && isValidId(adminUid) && (request.auth.uid == adminUid || isAdmin());
+      allow list: if false;
+
+      allow create: if isSignedIn()
+        && isValidId(adminUid)
+        && isValidAdminRecord(incoming())
+        && incoming().createdAt == request.time
+        && isBootstrapOwner();
+
+      allow update: if false;
+      allow delete: if isSignedIn() && isValidId(adminUid) && isBootstrapOwner();
+    }
+  }
+}

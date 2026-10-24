@@ -1,0 +1,212 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A shawl, rumaal, or laungi product in the Bari Shawl House catalog.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique product identifier.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "code": {
+          "type": "string",
+          "description": "Store SKU / Item code.",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "name": {
+          "type": "string",
+          "description": "Product name in English.",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "nameUrdu": {
+          "type": "string",
+          "description": "Product name in Urdu.",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "category": {
+          "type": "string",
+          "description": "Store product category.",
+          "enum": ["gents", "ladies", "bechgana", "rumaal", "laungi"]
+        },
+        "price": {
+          "type": "number",
+          "description": "Retail sale price in PKR."
+        },
+        "originalPrice": {
+          "type": "number",
+          "description": "Optional strikethrough comparison price in PKR."
+        },
+        "material": {
+          "type": "string",
+          "description": "Fabric or wool composition.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "style": {
+          "type": "string",
+          "description": "Weave or embroidery style.",
+          "minLength": 1,
+          "maxLength": 150
+        },
+        "color": {
+          "type": "string",
+          "description": "Color display name.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "colorHex": {
+          "type": "string",
+          "description": "Hex color swatch value.",
+          "minLength": 4,
+          "maxLength": 20
+        },
+        "inStock": {
+          "type": "boolean",
+          "description": "Whether the item is currently in stock."
+        },
+        "featured": {
+          "type": "boolean",
+          "description": "Whether the item appears on the homepage."
+        },
+        "isNew": {
+          "type": "boolean",
+          "description": "Whether the item is marked as a new arrival."
+        },
+        "dimensions": {
+          "type": "string",
+          "description": "Dimensions of the shawl or wrap.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "description": "English description of the product.",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "descriptionUrdu": {
+          "type": "string",
+          "description": "Urdu description of the product.",
+          "minLength": 0,
+          "maxLength": 1000
+        },
+        "care": {
+          "type": "string",
+          "description": "Washing and fabric care instructions.",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "origin": {
+          "type": "string",
+          "description": "Weaving origin.",
+          "minLength": 1,
+          "maxLength": 150
+        },
+        "patternType": {
+          "type": "string",
+          "description": "SVG fallback weave pattern.",
+          "enum": [
+            "kashmiri",
+            "paisley",
+            "herringbone",
+            "geometric",
+            "royal-velvet",
+            "laungi-stripe"
+          ]
+        },
+        "image": {
+          "type": "string",
+          "description": "Optional compressed product photo URL or Data URL.",
+          "minLength": 0,
+          "maxLength": 850000
+        },
+        "wholesaleAvailable": {
+          "type": "boolean",
+          "description": "Whether wholesale bulk pricing is available."
+        },
+        "wholesaleMinQty": {
+          "type": "number",
+          "description": "Minimum quantity for wholesale order."
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "UID of the shop owner who created/seeded the product.",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when product was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when product was last updated."
+        }
+      },
+      "required": [
+        "id",
+        "code",
+        "name",
+        "nameUrdu",
+        "category",
+        "price",
+        "material",
+        "style",
+        "color",
+        "colorHex",
+        "inStock",
+        "featured",
+        "isNew",
+        "dimensions",
+        "description",
+        "descriptionUrdu",
+        "care",
+        "origin",
+        "patternType",
+        "wholesaleAvailable",
+        "wholesaleMinQty",
+        "ownerId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Trusted admin role assignment document.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Verified admin email.",
+          "minLength": 3,
+          "maxLength": 200
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when admin record was created."
+        }
+      },
+      "required": ["email", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Public storefront product catalog managed exclusively by the verified shop owner."
+    },
+    "/admins/{adminUid}": {
+      "schema": "AdminRecord",
+      "description": "Trusted shop admin registry."
+    }
+  }
+}

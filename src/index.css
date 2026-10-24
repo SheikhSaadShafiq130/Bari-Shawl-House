@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-serif: "Cormorant Garamond", Georgia, serif;
+    --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+    --font-urdu: "Noto Nastaliq Urdu", serif;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    overflow-x: hidden;
+    background-color: #faf8f5;
+    color: #0f172a;
+  }
+}
+
+.font-serif-luxury {
+  font-family: var(--font-serif);
+}
+
+.font-sans-clean {
+  font-family: var(--font-sans);
+}
+
+.font-urdu {
+  font-family: var(--font-urdu);
+  line-height: 2.2;
+}
+
+/* Hide scrollbars on horizontal touch strips while keeping scroll functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Dashing Royal Multan Hero & Luxury Surface Backdrops */
+.pattern-multan-craft {
+  background-color: #0f172a;
+  background-image: 
+    radial-gradient(at 15% 20%, rgba(153, 27, 27, 0.32) 0px, transparent 55%),
+    radial-gradient(at 85% 80%, rgba(180, 83, 9, 0.25) 0px, transparent 55%),
+    radial-gradient(rgba(245, 158, 11, 0.14) 1px, transparent 0);
+  background-size: 100% 100%, 100% 100%, 24px 24px;
+}
+
+.pattern-royal-banner {
+  background: linear-gradient(135deg, #0f172a 0%, #450a0a 55%, #1e1b4b 100%);
+}
+
+.pattern-linen-light {
+  background-color: #faf8f5;
+  background-image: radial-gradient(#e2e8f0 0.85px, transparent 0.85px);
+  background-size: 16px 16px;
+}

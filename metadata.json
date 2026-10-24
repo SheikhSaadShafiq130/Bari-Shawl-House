@@ -1,0 +1,6 @@
+{
+  "name": "Bari Shawl House - Multan",
+  "description": "Multan's premier wholesale and retail shawl destination. Browse authentic Gents, Ladies, and Children's (Bechgana) shawls, Rumaal, and Laungi in wool, velvet, acrylic, and pashmina with direct WhatsApp ordering and cart checkout.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
