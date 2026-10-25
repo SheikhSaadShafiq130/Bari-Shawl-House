@@ -21,7 +21,7 @@ import {
   StudioAngleMode,
 } from '../types';
 import { ProductCard } from '../components/ProductCard';
-import { SHOP_INFO, CATEGORY_INFO } from '../data/products';
+import { SHOP_INFO, CATEGORY_INFO, getProductColors } from '../data/products';
 import { TextileImage } from '../components/TextileImage';
 
 interface HomeViewProps {
@@ -58,14 +58,16 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const [heroAngleIdx, setHeroAngleIdx] = useState(0);
   const isUrdu = lang === 'ur';
 
-  const featuredProducts = products.filter((p) => p.featured).slice(0, 10);
+  const featuredProducts = products.filter((p) => p.featured).slice(0, 9);
   const heroSampleProduct = products.find((p) => p.id === 'bsh-l-01') || products[0];
+  const heroColors = getProductColors(heroSampleProduct);
+  const [heroColor, setHeroColor] = useState<ProductColorOption>(heroColors[0]);
 
   return (
     <div className="space-y-10 sm:space-y-16 pb-10 sm:pb-16">
       {/* 1. Storefront Hero Section: Warm Cashmere & Sandstone Editorial Showcase */}
       <section className="relative overflow-hidden text-stone-900 pattern-multan-craft border-b border-[#C8BFA8]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-14 lg:py-18 grid grid-cols-1 lg:grid-cols-12 gap-7 lg:gap-10 items-stretch">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-14 lg:py-16 grid grid-cols-1 lg:grid-cols-12 gap-7 lg:gap-10 items-center">
           {/* Left Column: Shop Identity & Main Actions */}
           <div className="lg:col-span-7 flex flex-col justify-center space-y-4 sm:space-y-6">
             {/* Unboxed Clean Text Kicker */}
@@ -77,7 +79,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
             <div className="space-y-2.5 sm:space-y-3">
               <h1
-                className="font-serif-luxury text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-bold tracking-tight text-stone-900 leading-[1.12]"
+                className="font-serif-luxury text-3xl sm:text-4xl md:text-5xl lg:text-[3.4rem] font-bold tracking-tight text-stone-900 leading-[1.12]"
                 style={{ textWrap: 'balance' }}
               >
                 {isUrdu
@@ -87,7 +89,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <p className="text-stone-700 text-xs sm:text-sm md:text-base max-w-xl leading-relaxed font-medium">
                 {isUrdu
                   ? 'باری شال ہاؤس ملتان میں خوش آمدید۔ ہر شال کے دستیاب رنگ منتخب کریں اور منٹرا سٹائل میں 4 مختلف زاویوں (پہنے ہوئے، بازو پر اور بارڈر زوم) سے تصاویر دیکھیں۔ پورے پاکستان میں ہوم ڈیلیوری دستیاب ہے۔'
-                  : 'Welcome to Bari Shawl House, Multan. Choose your favorite available colors on every shawl and inspect 4 studio views (Full Shawl, Model Wearing, Hanging on Arm & Border Close-Up). Cash on Delivery across Pakistan.'}
+                  : 'Welcome to Bari Shawl House, Multan. Choose your favorite available color on every shawl and inspect 4 studio views (Full Shawl, Shoulder Drape, Folded Arm Fall & Border Close-Up). Cash on Delivery across Pakistan.'}
               </p>
             </div>
 
@@ -121,7 +123,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 className="min-h-[46px] px-4 py-2.5 sm:py-3 bg-[#FAF7F2] hover:bg-white active:scale-[0.98] text-stone-900 text-xs sm:text-sm font-semibold rounded-xl border border-[#BFB5A2] shadow-2xs transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap shrink-0"
               >
                 <Phone className="w-4 h-4 text-rose-700 shrink-0" />
-                <span>{SHOP_INFO.phoneDisplay}</span>
+                <span className="font-mono">{SHOP_INFO.phoneDisplay}</span>
               </a>
             </div>
 
@@ -154,18 +156,19 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </div>
           </div>
 
-          {/* Right Column: Featured Product Showcase with Interactive 4-Angle Switcher */}
+          {/* Right Column: Featured Product Showcase with Interactive 4-Angle & Color Switcher */}
           <div className="lg:col-span-5 flex items-center justify-center">
             <div className="w-full max-w-md bg-[#1E1B24] text-stone-100 rounded-2xl p-3.5 sm:p-4 border border-stone-700 shadow-2xl flex flex-col justify-between space-y-3">
               <div
-                onClick={() => onQuickView(heroSampleProduct)}
+                onClick={() => onQuickView(heroSampleProduct, heroColor)}
                 className="rounded-xl overflow-hidden cursor-pointer group border border-stone-700/80 bg-[#282430]"
               >
                 <TextileImage
                   product={heroSampleProduct}
                   aspect="4/3"
-                  showOverlayCode={heroAngleIdx === 0}
+                  showOverlayCode
                   viewMode={HERO_ANGLES[heroAngleIdx].mode}
+                  selectedColor={heroColor}
                 />
               </div>
 
@@ -176,7 +179,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     key={ang.mode}
                     type="button"
                     onClick={() => setHeroAngleIdx(idx)}
-                    className={`py-1.5 px-2 rounded-lg text-[11px] font-bold transition-colors ${
+                    className={`py-1.5 px-2 rounded-lg text-[11px] font-bold transition-colors whitespace-nowrap ${
                       heroAngleIdx === idx
                         ? 'bg-rose-700 text-white shadow-2xs'
                         : 'bg-stone-800 text-stone-300 hover:bg-stone-700 hover:text-white'
@@ -187,23 +190,50 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 ))}
               </div>
 
+              {/* Interactive Color Swatch Strip Inside Hero Card */}
+              <div className="flex items-center justify-between gap-2 pt-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] text-stone-400 font-semibold mr-1">
+                    Color:
+                  </span>
+                  {heroColors.map((col) => {
+                    const isSelected = col.name === heroColor.name;
+                    return (
+                      <button
+                        key={col.name}
+                        type="button"
+                        onClick={() => setHeroColor(col)}
+                        title={col.name}
+                        aria-label={`Select hero color ${col.name}`}
+                        className={`w-5 h-5 rounded-full border transition-transform ${
+                          isSelected
+                            ? 'ring-2 ring-amber-400 scale-110 border-white'
+                            : 'border-stone-500 opacity-80 hover:opacity-100'
+                        }`}
+                        style={{ backgroundColor: col.hex }}
+                      />
+                    );
+                  })}
+                </div>
+                <span className="text-[11px] font-semibold text-amber-300 truncate">
+                  {heroColor.name}
+                </span>
+              </div>
+
               <div className="pt-2.5 border-t border-stone-700/80 flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <span className="text-[11px] text-amber-400 font-bold block">
-                    Tap Any Angle Above or Open Full 4-Photo View
-                  </span>
                   <h2 className="text-sm sm:text-base font-bold text-white font-serif-luxury truncate">
                     {isUrdu ? heroSampleProduct.nameUrdu : heroSampleProduct.name}
                   </h2>
                   <p className="text-xs text-stone-300 font-mono tabular-nums mt-0.5 font-semibold">
-                    Rs. {heroSampleProduct.price.toLocaleString()} · 5 Colors Available
+                    Rs. {heroSampleProduct.price.toLocaleString()} · {heroColors.length} Colors
                   </p>
                 </div>
                 <button
-                  onClick={() => onQuickView(heroSampleProduct)}
-                  className="min-h-[42px] px-3.5 py-2 bg-rose-700 hover:bg-rose-600 active:scale-95 text-white text-xs font-bold rounded-xl transition-all whitespace-nowrap shrink-0 shadow-xs"
+                  onClick={() => onQuickView(heroSampleProduct, heroColor)}
+                  className="min-h-[40px] px-3.5 py-2 bg-rose-700 hover:bg-rose-600 active:scale-95 text-white text-xs font-bold rounded-xl transition-all whitespace-nowrap shrink-0 shadow-xs"
                 >
-                  4 Photos &amp; Colors
+                  Open Shawl Popup
                 </button>
               </div>
             </div>
@@ -362,8 +392,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs">
-                <div className="p-4 bg-[#FDFBF7] rounded-xl border border-[#C8BFA8] shadow-2xs space-y-1.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-[#C8BFA8] text-xs">
+                <div className="space-y-1.5">
                   <div className="flex items-center gap-2 text-rose-700">
                     <CreditCard className="w-4 h-4 shrink-0" />
                     <span className="font-bold text-stone-900 text-sm">
@@ -380,7 +410,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   </p>
                 </div>
 
-                <div className="p-4 bg-[#FDFBF7] rounded-xl border border-[#C8BFA8] shadow-2xs space-y-1.5">
+                <div className="space-y-1.5">
                   <span className="font-bold text-stone-900 text-sm block">
                     Wholesale &amp; Retail Supply
                   </span>
@@ -431,10 +461,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     </div>
                   </div>
 
-                  <div className="pt-2 border-t border-stone-700/80 grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 gap-2.5">
+                  <div className="pt-2 border-t border-stone-700/80 flex flex-wrap items-center justify-between gap-3">
                     <a
                       href={`tel:${SHOP_INFO.phoneTel}`}
-                      className="p-2.5 bg-stone-800/90 hover:bg-stone-800 rounded-xl border border-stone-700 block transition-colors"
+                      className="hover:text-white transition-colors"
                     >
                       <span className="text-stone-400 block text-[11px]">Phone / JazzCash:</span>
                       <span className="font-mono font-bold text-amber-400 text-sm">
@@ -445,7 +475,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                       href={`https://wa.me/${SHOP_INFO.whatsappIntl}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2.5 bg-emerald-950/70 hover:bg-emerald-900/70 rounded-xl border border-emerald-700/60 block transition-colors"
+                      className="hover:text-white transition-colors"
                     >
                       <span className="text-emerald-300 block text-[11px]">WhatsApp:</span>
                       <span className="font-mono font-bold text-emerald-400 text-sm">

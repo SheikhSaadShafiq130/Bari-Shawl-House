@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { MessageCircle, ShoppingBag, Check, Heart, Star, Images } from 'lucide-react';
+import { MessageCircle, ShoppingBag, Check, Heart, Star } from 'lucide-react';
 import { Product, ProductColorOption, StudioAngleMode } from '../types';
 import { TextileImage } from './TextileImage';
 import { buildWhatsAppProductUrl, getProductColors } from '../data/products';
@@ -20,10 +20,10 @@ interface ProductCardProps {
 }
 
 const CARD_ANGLES: { mode: StudioAngleMode; label: string }[] = [
-  { mode: 'full', label: 'Shawl' },
-  { mode: 'wearing', label: 'Wearing' },
-  { mode: 'arm-drape', label: 'On Arm' },
-  { mode: 'macro-zoom', label: 'Zoom' },
+  { mode: 'full', label: '1. Shawl' },
+  { mode: 'wearing', label: '2. Wearing' },
+  { mode: 'arm-drape', label: '3. On Arm' },
+  { mode: 'macro-zoom', label: '4. Zoom' },
 ];
 
 export const ProductCard: React.FC<ProductCardProps> = ({
@@ -63,8 +63,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       onClick={() => onQuickView(product, currentColor)}
       className="group relative flex flex-col bg-[#FDFBF7] border border-[#CFC6B8] hover:border-rose-600 active:border-rose-700 rounded-2xl overflow-hidden shadow-xs hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200 cursor-pointer"
     >
-      {/* Product Image Area with 4-Angle Preview Switcher */}
-      <div className="relative overflow-hidden bg-[#E6DFD3] border-b border-[#DED6C8]">
+      {/* Product Image Area (Uncluttered Full Visibility) */}
+      <div className="relative overflow-hidden bg-[#E6DFD3]">
         <TextileImage
           product={product}
           aspect="4/3"
@@ -73,10 +73,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           customOverrideImage={customAngleImg}
         />
 
-        {/* Subtle maximum 1 text tag per card */}
+        {/* Maximum 1 subtle text tag per card */}
         {(product.featured || product.isNew) && activeAngleIdx === 0 && (
-          <div className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 z-10">
-            <span className="bg-[#1E1B24]/90 text-amber-300 border border-amber-400/30 text-[10px] px-2.5 py-0.5 rounded-xs font-bold tracking-wide shadow-xs backdrop-blur-xs">
+          <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none">
+            <span className="bg-[#1E1B24]/88 text-amber-300 border border-amber-400/30 text-[10px] px-2.5 py-0.5 rounded-xs font-bold tracking-wide shadow-xs backdrop-blur-xs">
               {product.isNew
                 ? isUrdu
                   ? 'نیا ڈیزائن'
@@ -97,7 +97,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               onToggleWishlist(product.id);
             }}
             aria-label={isWishlisted ? 'Remove from Wishlist' : 'Save to Wishlist'}
-            className={`absolute top-2 right-2 sm:top-2.5 sm:right-2.5 z-10 w-8 h-8 rounded-full flex items-center justify-center border shadow-xs transition-transform active:scale-90 ${
+            className={`absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full flex items-center justify-center border shadow-xs transition-transform active:scale-90 ${
               isWishlisted
                 ? 'bg-rose-50 border-rose-300 text-rose-600'
                 : 'bg-white/90 hover:bg-white border-stone-300 text-stone-700'
@@ -106,39 +106,30 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-rose-600 text-rose-600' : ''}`} />
           </button>
         )}
-
-        {/* Myntra-Style 4-Photo Quick Angle Strip at Bottom of Image */}
-        {!compactMobile && (
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="absolute bottom-2 inset-x-2 z-10 flex items-center justify-between gap-1 bg-[#1E1B24]/85 backdrop-blur-xs px-2 py-1 rounded-lg border border-stone-700/80"
-          >
-            <div className="flex items-center gap-1">
-              {CARD_ANGLES.map((ang, idx) => (
-                <button
-                  key={ang.mode}
-                  type="button"
-                  onClick={() => setActiveAngleIdx(idx)}
-                  className={`px-1.5 py-0.5 rounded text-[10px] font-semibold transition-colors ${
-                    activeAngleIdx === idx
-                      ? 'bg-rose-700 text-white font-bold'
-                      : 'text-stone-300 hover:text-white'
-                  }`}
-                >
-                  {ang.label}
-                </button>
-              ))}
-            </div>
-            <span
-              onClick={() => onQuickView(product, currentColor)}
-              className="hidden sm:inline-flex items-center gap-1 text-[10px] text-amber-300 font-mono font-bold hover:underline"
-            >
-              <Images className="w-3 h-3" />
-              <span>4 Photos</span>
-            </span>
-          </div>
-        )}
       </div>
+
+      {/* Clean Segmented 4-Photo Angle Switcher Bar Below Image */}
+      {!compactMobile && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="grid grid-cols-4 bg-[#EFEAE1] border-y border-[#DED6C8] p-1 gap-1"
+        >
+          {CARD_ANGLES.map((ang, idx) => (
+            <button
+              key={ang.mode}
+              type="button"
+              onClick={() => setActiveAngleIdx(idx)}
+              className={`py-1 px-1 rounded-md text-[10px] font-bold transition-all whitespace-nowrap truncate ${
+                activeAngleIdx === idx
+                  ? 'bg-white text-rose-700 shadow-2xs'
+                  : 'text-stone-600 hover:text-stone-900'
+              }`}
+            >
+              {ang.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Product Details Area */}
       <div
@@ -156,7 +147,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 {product.inStock ? (isUrdu ? 'دستیاب' : 'In Stock') : isUrdu ? 'آرڈر پر' : 'On Order'}
               </span>
             </div>
-            <span className="inline-flex items-center gap-0.5 font-mono font-bold text-stone-800 shrink-0">
+            <span className="inline-flex items-center gap-0.5 font-mono tabular-nums font-bold text-stone-800 shrink-0">
               <span>{product.rating || 4.9}</span>
               <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
             </span>
@@ -176,7 +167,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           {/* Interactive Color Swatch Selector on Card */}
           <div
             onClick={(e) => e.stopPropagation()}
-            className="mt-2 flex items-center justify-between gap-2"
+            className="mt-2.5 flex items-center justify-between gap-2"
           >
             <div className="flex items-center gap-1.5 flex-wrap">
               {availableColors.slice(0, 5).map((colOpt) => {
@@ -227,7 +218,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 compactMobile ? 'hidden sm:inline' : ''
               }`}
             >
-              {isUrdu ? '4 تصاویر دیکھیں' : '4 Photos & Details'}
+              {isUrdu ? 'تفصیل اور تصاویر' : 'Open Shawl View →'}
             </span>
           </div>
 
@@ -239,7 +230,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             <button
               type="button"
               onClick={handleAdd}
-              className={`min-h-[44px] py-2 px-2.5 sm:px-3 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 ${
+              className={`min-h-[42px] py-2 px-2.5 sm:px-3 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 ${
                 added
                   ? 'bg-emerald-700 text-white'
                   : 'bg-rose-700 hover:bg-rose-800 text-white active:scale-[0.97]'
@@ -263,7 +254,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="min-h-[44px] py-2 px-2.5 sm:px-3 bg-emerald-700 hover:bg-emerald-800 active:scale-[0.97] text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-all whitespace-nowrap shrink-0"
+              className="min-h-[42px] py-2 px-2.5 sm:px-3 bg-emerald-700 hover:bg-emerald-800 active:scale-[0.97] text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-all whitespace-nowrap shrink-0"
               title="Order directly on WhatsApp"
             >
               <MessageCircle className="w-4 h-4 shrink-0" />
