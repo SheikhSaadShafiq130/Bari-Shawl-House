@@ -67,10 +67,10 @@ export const FaqView: React.FC<FaqViewProps> = ({ lang }) => {
         <span className="text-xs font-bold text-rose-800 uppercase tracking-wider">
           {isUrdu ? 'عام پوچھے جانے والے سوالات' : 'Helpful Information'}
         </span>
-        <h1 className="font-serif-luxury text-3xl sm:text-4xl font-bold text-slate-900">
+        <h1 className="font-serif-luxury text-3xl sm:text-4xl font-bold text-stone-900">
           {isUrdu ? 'سوالات اور جوابات (FAQ)' : 'Frequently Asked Questions'}
         </h1>
-        <p className="text-xs sm:text-sm text-stone-600">
+        <p className="text-xs sm:text-sm text-stone-700 font-medium">
           Simple answers about ordering, home delivery, payment accounts, and fabric care.
         </p>
       </div>
@@ -81,29 +81,29 @@ export const FaqView: React.FC<FaqViewProps> = ({ lang }) => {
           return (
             <div
               key={idx}
-              className="bg-white border border-stone-200 rounded-xl overflow-hidden transition-colors"
+              className="bg-[#FDFBF7] border border-[#CFC6B8] rounded-xl overflow-hidden transition-colors shadow-xs"
             >
               <button
                 onClick={() => setOpenIdx(isOpen ? null : idx)}
-                className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 hover:bg-stone-50 transition-colors"
+                className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 hover:bg-white transition-colors"
               >
                 <div className="space-y-0.5">
-                  <h2 className="font-serif-luxury text-lg font-bold text-slate-900">
+                  <h2 className="font-serif-luxury text-lg font-bold text-stone-900">
                     {faq.q}
                   </h2>
-                  <p className="text-xs text-stone-500 font-urdu">{faq.qUrdu}</p>
+                  <p className="text-xs text-stone-600 font-urdu">{faq.qUrdu}</p>
                 </div>
                 <ChevronDown
-                  className={`w-5 h-5 text-stone-400 shrink-0 transition-transform duration-200 ${
-                    isOpen ? 'rotate-180 text-rose-800' : ''
+                  className={`w-5 h-5 text-stone-500 shrink-0 transition-transform duration-200 ${
+                    isOpen ? 'rotate-180 text-rose-700' : ''
                   }`}
                 />
               </button>
 
               {isOpen && (
-                <div className="px-4 sm:px-5 pb-5 pt-2 border-t border-stone-100 text-xs sm:text-sm text-stone-700 space-y-2 leading-relaxed bg-stone-50/60">
+                <div className="px-4 sm:px-5 pb-5 pt-2 border-t border-[#E6DFD3] text-xs sm:text-sm text-stone-800 space-y-2 leading-relaxed bg-[#EFEAE1]/70">
                   <p>{faq.a}</p>
-                  <p className="text-xs text-stone-600 font-urdu pt-1">{faq.aUrdu}</p>
+                  <p className="text-xs text-stone-700 font-urdu pt-1">{faq.aUrdu}</p>
                 </div>
               )}
             </div>
@@ -111,22 +111,22 @@ export const FaqView: React.FC<FaqViewProps> = ({ lang }) => {
         })}
       </div>
 
-      <div className="bg-slate-950 text-white p-6 rounded-2xl border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="bg-[#1E1B24] text-stone-100 p-6 rounded-2xl border border-stone-700 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
         <div>
           <h3 className="font-serif-luxury text-xl font-bold text-white">
             Still have a question?
           </h3>
-          <p className="text-xs text-slate-300 mt-0.5">
+          <p className="text-xs text-stone-300 mt-0.5">
             Message us directly on WhatsApp and we will reply right away.
           </p>
         </div>
         <a
           href={`https://wa.me/${SHOP_INFO.whatsappIntl}?text=${encodeURIComponent(
-            'Assalam-o-Alaikum Bari Textile Multan! I have a question.'
+            'Assalam-o-Alaikum Bari Shawl House! I have a question.'
           )}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white font-semibold text-xs rounded-xl flex items-center gap-2 shrink-0 transition-colors"
+          className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white font-semibold text-xs rounded-xl flex items-center gap-2 shrink-0 transition-colors shadow-xs"
         >
           <MessageCircle className="w-4 h-4" />
           <span>Chat on WhatsApp ({SHOP_INFO.whatsappDisplay})</span>

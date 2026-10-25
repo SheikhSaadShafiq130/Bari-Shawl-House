@@ -10,12 +10,23 @@
   html {
     -webkit-tap-highlight-color: transparent;
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
     overflow-x: hidden;
-    background-color: #faf8f5;
-    color: #0f172a;
+    background-color: #ebe5dc;
+    color: #1c1917;
+    overscroll-behavior-y: none;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  [role="button"] {
+    touch-action: manipulation;
   }
 }
 
@@ -32,6 +43,11 @@
   line-height: 2.2;
 }
 
+/* Safe area support for Android gesture navigation bars & notched screens */
+.pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
 /* Hide scrollbars on horizontal touch strips while keeping scroll functionality */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -39,24 +55,25 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Dashing Royal Multan Hero & Luxury Surface Backdrops */
+/* Warm Medium-Light Cashmere & Sandstone Studio Backdrops (Not stark white) */
 .pattern-multan-craft {
-  background-color: #0f172a;
+  background-color: #e5dec9;
   background-image: 
-    radial-gradient(at 15% 20%, rgba(153, 27, 27, 0.32) 0px, transparent 55%),
-    radial-gradient(at 85% 80%, rgba(180, 83, 9, 0.25) 0px, transparent 55%),
-    radial-gradient(rgba(245, 158, 11, 0.14) 1px, transparent 0);
-  background-size: 100% 100%, 100% 100%, 24px 24px;
+    radial-gradient(at 12% 18%, rgba(190, 18, 60, 0.10) 0px, transparent 55%),
+    radial-gradient(at 88% 82%, rgba(180, 83, 9, 0.09) 0px, transparent 55%),
+    linear-gradient(135deg, #e6dfd3 0%, #f2ece1 50%, #e2d9c8 100%);
+  background-size: 100% 100%, 100% 100%, 100% 100%;
 }
 
 .pattern-royal-banner {
-  background: linear-gradient(135deg, #0f172a 0%, #450a0a 55%, #1e1b4b 100%);
+  background: linear-gradient(135deg, #e5ddd0 0%, #f0e6e4 50%, #e4dcd0 100%);
 }
 
 .pattern-linen-light {
-  background-color: #faf8f5;
-  background-image: radial-gradient(#e2e8f0 0.85px, transparent 0.85px);
+  background-color: #e7e0d4;
+  background-image: radial-gradient(#b8afa0 0.9px, transparent 0.9px);
   background-size: 16px 16px;
 }

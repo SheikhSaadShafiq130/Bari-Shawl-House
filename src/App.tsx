@@ -6,8 +6,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
-import { Product, ProductCategory, CartItem } from './types';
-import { INITIAL_PRODUCTS, SHOP_INFO } from './data/products';
+import {
+  Product,
+  ProductCategory,
+  CartItem,
+  ProductColorOption,
+} from './types';
+import { INITIAL_PRODUCTS, SHOP_INFO, getProductColors } from './data/products';
 import {
   auth,
   db,
@@ -30,10 +35,19 @@ import { AboutView } from './views/AboutView';
 import { ContactView } from './views/ContactView';
 import { FaqView } from './views/FaqView';
 import { OwnerHandoverView } from './views/OwnerHandoverView';
-import { Phone, MessageCircle, ShoppingBag } from 'lucide-react';
+import {
+  Phone,
+  MessageCircle,
+  ShoppingBag,
+  Home,
+  LayoutGrid,
+  Check,
+  ArrowRight,
+} from 'lucide-react';
 
-const STORAGE_KEY_PRODUCTS = 'bari_textile_multan_products_v7';
-const STORAGE_KEY_CART = 'bari_shawl_house_cart_v2';
+const STORAGE_KEY_PRODUCTS = 'bari_shawl_house_products_v8';
+const STORAGE_KEY_CART = 'bari_shawl_house_cart_v3';
+const STORAGE_KEY_WISHLIST = 'bari_shawl_house_wishlist_v1';
 const STORAGE_KEY_LANG = 'bari_shawl_house_lang_v2';
 
 export default function App() {
@@ -68,14 +82,29 @@ export default function App() {
     return [];
   });
 
+  const [wishlistIds, setWishlistIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_WISHLIST);
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // fallback
+    }
+    return [];
+  });
+
+  const [onlyWishlistFilter, setOnlyWishlistFilter] = useState(false);
   const [activeCategory, setActiveCategory] = useState<ProductCategory>('all');
   const [activeView, setActiveView] = useState<string>('home');
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedModalColor, setSelectedModalColor] = useState<
+    ProductColorOption | undefined
+  >(undefined);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isWholesaleOpen, setIsWholesaleOpen] = useState(false);
   const [wholesaleTargetProduct, setWholesaleTargetProduct] = useState<Product | null>(null);
+  const [cartToastItem, setCartToastItem] = useState<string | null>(null);
 
   const [lang, setLang] = useState<'en' | 'ur'>(() => {
     try {
@@ -86,6 +115,55 @@ export default function App() {
     }
     return 'en';
   });
+
+  // Android Hardware / Gesture Back Button Support
+  const overlayStateRef = useRef({
+    selectedProduct,
+    isCartOpen,
+    isWholesaleOpen,
+    isAdminOpen,
+    activeView,
+  });
+  overlayStateRef.current = {
+    selectedProduct,
+    isCartOpen,
+    isWholesaleOpen,
+    isAdminOpen,
+    activeView,
+  };
+
+  useEffect(() => {
+    const hasOverlayOrSubView =
+      Boolean(selectedProduct) ||
+      isCartOpen ||
+      isWholesaleOpen ||
+      isAdminOpen ||
+      activeView !== 'home';
+
+    if (hasOverlayOrSubView) {
+      window.history.pushState({ bariOverlay: true }, '');
+    }
+  }, [Boolean(selectedProduct), isCartOpen, isWholesaleOpen, isAdminOpen, activeView]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const st = overlayStateRef.current;
+      if (st.selectedProduct) {
+        setSelectedProduct(null);
+      } else if (st.isCartOpen) {
+        setIsCartOpen(false);
+      } else if (st.isWholesaleOpen) {
+        setIsWholesaleOpen(false);
+      } else if (st.isAdminOpen) {
+        setIsAdminOpen(false);
+      } else if (st.activeView !== 'home') {
+        setActiveView('home');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Track Firebase Authentication state
   useEffect(() => {
@@ -113,7 +191,6 @@ export default function App() {
             cloudDocsMap.set(docId, d);
           });
 
-          // Check if cloud catalog is still from an older seed (before the 10 unique v3 bumble images)
           const hasAllV3 = INITIAL_PRODUCTS.every((initProd) => {
             const d = cloudDocsMap.get(initProd.id);
             return d && typeof d.image === 'string' && d.image.includes('?v=3');
@@ -138,19 +215,27 @@ export default function App() {
 
             return {
               id: docId,
-              code: String(d.code || fallbackDefault?.code || 'BTM-100'),
+              code: String(d.code || fallbackDefault?.code || 'BSH-100'),
               name: String(d.name || fallbackDefault?.name || 'Bari Shawl'),
               nameUrdu: String(d.nameUrdu || fallbackDefault?.nameUrdu || ''),
-              category: (d.category as Product['category']) || fallbackDefault?.category || 'ladies',
+              category:
+                (d.category as Product['category']) || fallbackDefault?.category || 'ladies',
               price: Number(d.price) || fallbackDefault?.price || 0,
               originalPrice:
                 typeof d.originalPrice === 'number'
                   ? d.originalPrice
                   : fallbackDefault?.originalPrice,
-              material: (d.material as Product['material']) || fallbackDefault?.material || 'Pure Wool',
+              material:
+                (d.material as Product['material']) || fallbackDefault?.material || 'Pure Wool',
               style: String(d.style || fallbackDefault?.style || ''),
               color: String(d.color || fallbackDefault?.color || ''),
               colorHex: String(d.colorHex || fallbackDefault?.colorHex || '#1E293B'),
+              availableColors: fallbackDefault?.availableColors,
+              galleryImages: fallbackDefault?.galleryImages,
+              weightGrams: fallbackDefault?.weightGrams,
+              warmthLevel: fallbackDefault?.warmthLevel,
+              rating: fallbackDefault?.rating || 4.9,
+              reviewCount: fallbackDefault?.reviewCount || 32,
               inStock: Boolean(d.inStock),
               featured: Boolean(d.featured),
               isNew: Boolean(d.isNew),
@@ -169,9 +254,23 @@ export default function App() {
             };
           });
 
-          setProducts(cloudProducts);
+          setProducts((prev) =>
+            cloudProducts.map((cp) => {
+              const localMatch = prev.find((lp) => lp.id === cp.id);
+              return {
+                ...cp,
+                availableColors:
+                  localMatch?.availableColors && localMatch.availableColors.length > 0
+                    ? localMatch.availableColors
+                    : cp.availableColors,
+                galleryImages:
+                  localMatch?.galleryImages && localMatch.galleryImages.length > 0
+                    ? localMatch.galleryImages
+                    : cp.galleryImages,
+              };
+            })
+          );
         } else if (currentUser && isOwnerUser(currentUser) && !hasSeededRef.current) {
-          // Automatically seed initial catalog into Firestore when the verified owner logs in
           hasSeededRef.current = true;
           seedCatalogToFirestore(INITIAL_PRODUCTS, currentUser).catch((err) => {
             console.error('Initial catalog seed error:', err);
@@ -204,6 +303,14 @@ export default function App() {
 
   useEffect(() => {
     try {
+      localStorage.setItem(STORAGE_KEY_WISHLIST, JSON.stringify(wishlistIds));
+    } catch {
+      // fallback
+    }
+  }, [wishlistIds]);
+
+  useEffect(() => {
+    try {
       localStorage.setItem(STORAGE_KEY_LANG, lang);
     } catch {
       // fallback
@@ -218,34 +325,94 @@ export default function App() {
     setLang((prev) => (prev === 'en' ? 'ur' : 'en'));
   };
 
-  const handleAddToCart = (product: Product, quantity = 1) => {
+  const handleToggleWishlist = (productId: string) => {
+    setWishlistIds((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  const handleQuickView = (product: Product, colorOption?: ProductColorOption) => {
+    setSelectedModalColor(colorOption || getProductColors(product)[0]);
+    setSelectedProduct(product);
+  };
+
+  const handleAddToCart = (
+    product: Product,
+    quantity = 1,
+    colorOption?: ProductColorOption
+  ) => {
+    const chosenColor = colorOption || getProductColors(product)[0];
     setCart((prev) => {
-      const existing = prev.find((item) => item.product.id === product.id);
+      const existing = prev.find(
+        (item) =>
+          item.product.id === product.id &&
+          (item.selectedColor?.name || item.product.color) === chosenColor.name
+      );
       if (existing) {
         return prev.map((item) =>
-          item.product.id === product.id
+          item.product.id === product.id &&
+          (item.selectedColor?.name || item.product.color) === chosenColor.name
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
-      return [...prev, { product, quantity }];
+      return [...prev, { product, quantity, selectedColor: chosenColor }];
     });
+    const baseName = lang === 'ur' ? product.nameUrdu : product.name;
+    setCartToastItem(`${baseName} (${chosenColor.name})`);
   };
 
-  const handleUpdateCartQuantity = (productId: string, quantity: number) => {
+  useEffect(() => {
+    if (!cartToastItem) return;
+    const timer = setTimeout(() => setCartToastItem(null), 3500);
+    return () => clearTimeout(timer);
+  }, [cartToastItem]);
+
+  const handleUpdateCartQuantity = (
+    productId: string,
+    colorName: string | undefined,
+    quantity: number
+  ) => {
     if (quantity <= 0) {
-      handleRemoveCartItem(productId);
+      handleRemoveCartItem(productId, colorName);
       return;
     }
     setCart((prev) =>
       prev.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item
+        item.product.id === productId &&
+        (!colorName || item.selectedColor?.name === colorName)
+          ? { ...item, quantity }
+          : item
       )
     );
   };
 
-  const handleRemoveCartItem = (productId: string) => {
-    setCart((prev) => prev.filter((item) => item.product.id !== productId));
+  const handleUpdateCartColor = (
+    productId: string,
+    oldColorName: string | undefined,
+    newColor: ProductColorOption
+  ) => {
+    setCart((prev) =>
+      prev.map((item) =>
+        item.product.id === productId && item.selectedColor?.name === oldColorName
+          ? { ...item, selectedColor: newColor }
+          : item
+      )
+    );
+  };
+
+  const handleRemoveCartItem = (productId: string, colorName?: string) => {
+    setCart((prev) =>
+      prev.filter(
+        (item) =>
+          !(
+            item.product.id === productId &&
+            (!colorName || item.selectedColor?.name === colorName)
+          )
+      )
+    );
   };
 
   const handleClearCart = () => {
@@ -253,10 +420,8 @@ export default function App() {
   };
 
   const handleSaveProduct = async (updated: Product) => {
-    if (!currentUser || !isOwnerUser(currentUser)) return;
     setIsSavingCloud(true);
     try {
-      await saveProductToFirestore(updated, currentUser);
       setProducts((prev) => {
         const exists = prev.some((p) => p.id === updated.id);
         if (exists) {
@@ -264,40 +429,46 @@ export default function App() {
         }
         return [updated, ...prev];
       });
+      if (currentUser && isOwnerUser(currentUser)) {
+        await saveProductToFirestore(updated, currentUser);
+      }
     } finally {
       setIsSavingCloud(false);
     }
   };
 
   const handleDeleteProduct = async (productId: string) => {
-    if (!currentUser || !isOwnerUser(currentUser)) return;
     setIsSavingCloud(true);
     try {
-      await deleteProductFromFirestore(productId);
       setProducts((prev) => prev.filter((p) => p.id !== productId));
       setCart((prev) => prev.filter((item) => item.product.id !== productId));
+      if (currentUser && isOwnerUser(currentUser)) {
+        await deleteProductFromFirestore(productId);
+      }
     } finally {
       setIsSavingCloud(false);
     }
   };
 
   const handleResetCatalog = async () => {
-    if (!currentUser || !isOwnerUser(currentUser)) return;
     setIsSavingCloud(true);
     try {
-      await seedCatalogToFirestore(INITIAL_PRODUCTS, currentUser);
       setProducts(INITIAL_PRODUCTS);
+      if (currentUser && isOwnerUser(currentUser)) {
+        await seedCatalogToFirestore(INITIAL_PRODUCTS, currentUser);
+      }
     } finally {
       setIsSavingCloud(false);
     }
   };
 
   const handleImportCatalog = async (imported: Product[]) => {
-    if (!currentUser || !isOwnerUser(currentUser)) return;
     setIsSavingCloud(true);
     try {
-      await seedCatalogToFirestore(imported, currentUser);
       setProducts(imported);
+      if (currentUser && isOwnerUser(currentUser)) {
+        await seedCatalogToFirestore(imported, currentUser);
+      }
     } finally {
       setIsSavingCloud(false);
     }
@@ -314,16 +485,25 @@ export default function App() {
   };
 
   const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const isUrdu = lang === 'ur';
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF8F5] font-sans-clean">
+    <div className="min-h-screen flex flex-col bg-[#EBE5DC] text-[#1C1917] font-sans-clean pb-18 lg:pb-0">
       <Navbar
         activeCategory={activeCategory}
-        onSelectCategory={setActiveCategory}
+        onSelectCategory={(cat) => {
+          setOnlyWishlistFilter(false);
+          setActiveCategory(cat);
+        }}
         activeView={activeView}
         onSelectView={setActiveView}
         cartCount={totalCartCount}
         onOpenCart={() => setIsCartOpen(true)}
+        wishlistCount={wishlistIds.length}
+        onOpenWishlist={() => {
+          setOnlyWishlistFilter(true);
+          setActiveView('shop');
+        }}
         lang={lang}
         onToggleLang={handleToggleLang}
         onOpenAdmin={() => setIsAdminOpen(true)}
@@ -334,11 +514,16 @@ export default function App() {
         {activeView === 'home' && (
           <HomeView
             products={products}
-            onSelectCategory={setActiveCategory}
+            onSelectCategory={(cat) => {
+              setOnlyWishlistFilter(false);
+              setActiveCategory(cat);
+            }}
             onSelectView={setActiveView}
-            onQuickView={setSelectedProduct}
+            onQuickView={handleQuickView}
             onAddToCart={handleAddToCart}
             onOpenWholesale={handleOpenGeneralWholesale}
+            wishlistIds={wishlistIds}
+            onToggleWishlist={handleToggleWishlist}
             lang={lang}
           />
         )}
@@ -348,8 +533,12 @@ export default function App() {
             products={products}
             activeCategory={activeCategory}
             onSelectCategory={setActiveCategory}
-            onQuickView={setSelectedProduct}
+            onQuickView={handleQuickView}
             onAddToCart={handleAddToCart}
+            wishlistIds={wishlistIds}
+            onToggleWishlist={handleToggleWishlist}
+            onlyWishlistFilter={onlyWishlistFilter}
+            onToggleWishlistFilter={setOnlyWishlistFilter}
             lang={lang}
           />
         )}
@@ -375,45 +564,116 @@ export default function App() {
       </main>
 
       <Footer
-        onSelectCategory={setActiveCategory}
+        onSelectCategory={(cat) => {
+          setOnlyWishlistFilter(false);
+          setActiveCategory(cat);
+        }}
         onSelectView={setActiveView}
         onOpenAdmin={() => setIsAdminOpen(true)}
         onOpenWholesale={handleOpenGeneralWholesale}
         lang={lang}
       />
 
-      {/* Mobile Bottom Action Bar */}
-      <aside
-        aria-label="Quick Contact and Bag"
-        className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-md border-t border-stone-200 p-2 shadow-lg"
-      >
-        <div className="grid grid-cols-3 gap-2 max-w-md mx-auto">
-          <a
-            href={`tel:${SHOP_INFO.phoneTel}`}
-            className="flex items-center justify-center gap-1.5 py-2.5 px-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl transition-colors"
+      {/* Instant Thumb-Zone Toast when Item Added to Bag */}
+      {cartToastItem && !isCartOpen && (
+        <div className="fixed bottom-20 inset-x-3 sm:left-auto sm:right-6 sm:bottom-6 sm:w-96 z-40 bg-[#1E1B24] text-white px-4 py-3 rounded-2xl shadow-2xl border border-stone-700 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0">
+              <Check className="w-3.5 h-3.5" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[11px] text-amber-400 font-bold">
+                {isUrdu ? 'شاپنگ بیگ میں شامل ہو گیا' : 'Added to Shopping Bag'}
+              </p>
+              <p className="text-xs font-semibold text-stone-100 truncate">{cartToastItem}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setCartToastItem(null);
+              setIsCartOpen(true);
+            }}
+            className="min-h-[38px] px-3 py-1.5 bg-rose-700 hover:bg-rose-800 active:scale-95 text-white text-xs font-bold rounded-xl shrink-0 flex items-center gap-1 shadow-2xs"
           >
-            <Phone className="w-3.5 h-3.5 text-amber-400" />
-            <span>Call Shop</span>
-          </a>
+            <span>{isUrdu ? 'بیگ دیکھیں' : 'View Bag'}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {/* Ergonomic Android Mobile Bottom Navigation & Action Dock */}
+      <aside
+        aria-label="Mobile Navigation and Quick Actions"
+        className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-[#FAF7F2]/98 backdrop-blur-md border-t border-[#CFC6B8] px-2 pt-1.5 pb-safe shadow-[0_-4px_20px_rgba(28,25,23,0.12)]"
+      >
+        <div className="grid grid-cols-5 gap-1 max-w-lg mx-auto items-center">
+          <button
+            type="button"
+            onClick={() => {
+              setActiveView('home');
+            }}
+            className={`min-h-[48px] flex flex-col items-center justify-center rounded-xl transition-all active:scale-95 ${
+              activeView === 'home'
+                ? 'text-rose-700 font-bold bg-rose-100/80'
+                : 'text-stone-700 font-medium hover:text-stone-950'
+            }`}
+          >
+            <Home className="w-5 h-5" />
+            <span className="text-[10px] tracking-tight mt-0.5">{isUrdu ? 'ہوم' : 'Home'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setOnlyWishlistFilter(false);
+              setActiveCategory('all');
+              setActiveView('shop');
+            }}
+            className={`min-h-[48px] flex flex-col items-center justify-center rounded-xl transition-all active:scale-95 ${
+              activeView === 'shop'
+                ? 'text-rose-700 font-bold bg-rose-100/80'
+                : 'text-stone-700 font-medium hover:text-stone-950'
+            }`}
+          >
+            <LayoutGrid className="w-5 h-5" />
+            <span className="text-[10px] tracking-tight mt-0.5">{isUrdu ? 'شالیں' : 'Catalog'}</span>
+          </button>
 
           <a
             href={`https://wa.me/${SHOP_INFO.whatsappIntl}?text=${encodeURIComponent(
-              'Assalam-o-Alaikum Bari Textile Multan! I want to ask about your shawls.'
+              'Assalam-o-Alaikum Bari Shawl House! I want to ask about your shawls.'
             )}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-1.5 py-2.5 px-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-xl transition-colors"
+            className="min-h-[48px] flex flex-col items-center justify-center bg-emerald-700 active:bg-emerald-800 active:scale-95 text-white rounded-xl shadow-xs transition-all"
           >
-            <MessageCircle className="w-3.5 h-3.5" />
-            <span>WhatsApp</span>
+            <MessageCircle className="w-5 h-5" />
+            <span className="text-[10px] font-bold tracking-tight mt-0.5">WhatsApp</span>
+          </a>
+
+          <a
+            href={`tel:${SHOP_INFO.phoneTel}`}
+            className="min-h-[48px] flex flex-col items-center justify-center text-stone-800 hover:text-stone-950 active:scale-95 rounded-xl font-medium transition-all"
+          >
+            <Phone className="w-5 h-5 text-rose-700" />
+            <span className="text-[10px] tracking-tight mt-0.5">{isUrdu ? 'کال کریں' : 'Call Shop'}</span>
           </a>
 
           <button
+            type="button"
             onClick={() => setIsCartOpen(true)}
-            className="flex items-center justify-center gap-1.5 py-2.5 px-2 bg-rose-900 hover:bg-rose-800 text-white text-xs font-semibold rounded-xl transition-colors relative"
+            className="min-h-[48px] relative flex flex-col items-center justify-center text-stone-800 hover:text-rose-700 active:scale-95 rounded-xl font-semibold transition-all"
           >
-            <ShoppingBag className="w-3.5 h-3.5 text-amber-300" />
-            <span>Bag ({totalCartCount})</span>
+            <div className="relative">
+              <ShoppingBag className="w-5 h-5 text-rose-700" />
+              {totalCartCount > 0 && (
+                <span className="absolute -top-1.5 -right-2.5 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-700 text-white font-mono text-[10px] font-bold flex items-center justify-center">
+                  {totalCartCount}
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] tracking-tight mt-0.5">{isUrdu ? 'بیگ' : 'Bag'}</span>
           </button>
         </div>
       </aside>
@@ -421,9 +681,12 @@ export default function App() {
       {selectedProduct && (
         <ProductDetailModal
           product={selectedProduct}
+          initialColor={selectedModalColor}
           onClose={() => setSelectedProduct(null)}
           onAddToCart={handleAddToCart}
           onOpenWholesaleForProduct={handleOpenWholesaleForProduct}
+          isWishlisted={wishlistIds.includes(selectedProduct.id)}
+          onToggleWishlist={handleToggleWishlist}
           lang={lang}
         />
       )}
@@ -433,6 +696,7 @@ export default function App() {
         onClose={() => setIsCartOpen(false)}
         items={cart}
         onUpdateQuantity={handleUpdateCartQuantity}
+        onUpdateColor={handleUpdateCartColor}
         onRemoveItem={handleRemoveCartItem}
         onClearCart={handleClearCart}
         lang={lang}

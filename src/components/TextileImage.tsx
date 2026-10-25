@@ -1,248 +1,549 @@
 /**
  * @license
- * SPDX-License-Identifier: Apache-2.0
+ * @spdx-license-identifier Apache-2.0
  */
 
 import React, { useState, useEffect } from 'react';
-import { Product } from '../types';
+import { Product, ProductColorOption, StudioAngleMode } from '../types';
 
 interface TextileImageProps {
   product: Product;
-  aspect?: '4/3' | '16/9' | '1/1' | 'full';
   className?: string;
+  aspect?: '4/5' | '4/3' | '1/1' | '16/9';
   showOverlayCode?: boolean;
+  viewMode?: StudioAngleMode;
+  selectedColor?: ProductColorOption;
+  customOverrideImage?: string;
 }
 
+/**
+ * Renders the product's real photograph across 4 Myntra-style professional studio angles:
+ * 1. 'full': Full Shawl & Pallu Display
+ * 2. 'wearing': Model / Shoulder Drape Editorial View
+ * 3. 'arm-drape': Hanging on Forearm / Folded Fall View
+ * 4. 'macro-zoom': Macro Embroidery, Border & Bumble Tassel Close-Up
+ *
+ * Also supports live color-swatch tinting when a customer selects an alternate color option,
+ * and falls back to an intricate woven textile SVG if an image URL fails.
+ */
 export const TextileImage: React.FC<TextileImageProps> = ({
   product,
-  aspect = '4/3',
   className = '',
+  aspect = '4/3',
   showOverlayCode = false,
+  viewMode = 'full',
+  selectedColor,
+  customOverrideImage,
 }) => {
   const [imgError, setImgError] = useState(false);
 
+  const effectiveImage =
+    customOverrideImage ||
+    selectedColor?.image ||
+    product.image;
+
   useEffect(() => {
     setImgError(false);
-  }, [product.image]);
+  }, [effectiveImage, product.id, viewMode, selectedColor?.hex]);
 
   const aspectClass =
-    aspect === '4/3'
-      ? 'aspect-[4/3]'
-      : aspect === '16/9'
-      ? 'aspect-[16/9]'
+    aspect === '4/5'
+      ? 'aspect-[4/5]'
       : aspect === '1/1'
       ? 'aspect-square'
-      : 'h-full w-full';
+      : aspect === '16/9'
+      ? 'aspect-video'
+      : 'aspect-[4/3]';
 
-  const isCompact = aspect === '1/1';
+  const activeHex = selectedColor?.hex || product.colorHex;
+  const activeColorName = selectedColor?.name || product.color;
+  const isAlternateColorSelected =
+    Boolean(selectedColor) &&
+    selectedColor?.hex.toLowerCase() !== product.colorHex.toLowerCase() &&
+    !selectedColor?.image &&
+    !customOverrideImage;
 
-  // If the shop owner uploaded a real photo or pasted a valid image URL
-  if (product.image && !imgError) {
+  const hasValidImage = Boolean(
+    effectiveImage && effectiveImage.trim().length > 0 && !imgError
+  );
+
+  // If customOverrideImage is explicitly provided for this gallery slot, show it directly
+  if (customOverrideImage && !imgError) {
     return (
-      <div className={`relative overflow-hidden bg-stone-900 ${aspectClass} ${className}`}>
+      <div className={`relative overflow-hidden bg-[#E5DEC9] ${aspectClass} ${className}`}>
         <img
-          src={product.image}
-          alt={product.name}
-          referrerPolicy="no-referrer"
+          src={customOverrideImage}
+          alt={`${product.name} - ${activeColorName}`}
+          loading="lazy"
           onError={() => setImgError(true)}
-          className="h-full w-full object-cover object-bottom transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-103"
         />
+      </div>
+    );
+  }
+
+  // ============================================================================
+  // STUDIO ANGLE 2: WEARING / MODEL SHOULDER DRAPE VIEW (Myntra Editorial Style)
+  // ============================================================================
+  if (viewMode === 'wearing' && hasValidImage) {
+    const isLadies = product.category === 'ladies';
+    const isYouth = product.category === 'bechgana';
+    const uid = `${product.id}-wear`;
+
+    return (
+      <div
+        className={`relative overflow-hidden bg-gradient-to-b from-[#E8E0D2] via-[#DDD3C2] to-[#CFC3AE] select-none ${aspectClass} ${className}`}
+      >
+        {/* Warm Studio Backdrop Lighting */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'radial-gradient(circle at 50% 28%, rgba(255,252,245,0.75) 0%, rgba(210,198,178,0.25) 58%, rgba(160,145,125,0.45) 100%)',
+          }}
+        />
+
+        {/* Studio Editorial Composite SVG with Real Product Texture Draped Over Shoulders */}
+        <svg
+          viewBox="0 0 400 320"
+          className="w-full h-full object-cover"
+          preserveAspectRatio="xMidYMid slice"
+          aria-label={`${product.name} worn over shoulders`}
+        >
+          <defs>
+            <linearGradient id={`kameez-${uid}`} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor={isLadies ? '#2A242D' : '#F7F4EE'} />
+              <stop offset="55%" stopColor={isLadies ? '#1E1921' : '#EAE3D5'} />
+              <stop offset="100%" stopColor={isLadies ? '#141116' : '#D8CEBC'} />
+            </linearGradient>
+
+            <linearGradient id={`fold-shadow-${uid}`} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#000000" stopOpacity="0.32" />
+              <stop offset="22%" stopColor="#000000" stopOpacity="0.0" />
+              <stop offset="50%" stopColor="#ffffff" stopOpacity="0.12" />
+              <stop offset="78%" stopColor="#000000" stopOpacity="0.05" />
+              <stop offset="100%" stopColor="#000000" stopOpacity="0.38" />
+            </linearGradient>
+
+            {/* Clip Path for Left & Right Shoulder Shawl Drape (Pakistani / Myntra Style) */}
+            <clipPath id={`shawl-drape-clip-${uid}`}>
+              <path d="M 92,74 C 122,62 155,60 172,66 L 166,288 C 132,292 98,288 72,278 C 66,205 72,120 92,74 Z M 228,66 C 245,60 278,62 308,74 C 328,120 334,205 328,278 C 292,292 225,296 178,286 L 204,132 Z" />
+            </clipPath>
+          </defs>
+
+          {/* Subtle Studio Arch Pedestal Backdrop */}
+          <path
+            d="M 65,320 L 65,120 A 135,115 0 0,1 335,120 L 335,320 Z"
+            fill="#F5F0E6"
+            opacity="0.55"
+          />
+
+          {/* Tailored Studio Mannequin / Model Neck & Collar */}
+          <path
+            d="M 176,22 C 176,38 172,52 164,62 L 236,62 C 228,52 224,38 224,22 Z"
+            fill="#C69C72"
+            opacity="0.9"
+          />
+          <ellipse cx="200" cy="22" rx="26" ry="12" fill="#B58960" />
+
+          {/* Base Kurta / Shalwar Kameez Torso Silhouette */}
+          <path
+            d={
+              isYouth
+                ? 'M 98,74 C 130,58 165,56 200,56 C 235,56 270,58 302,74 L 322,320 L 78,320 Z'
+                : 'M 78,72 C 118,54 162,52 200,52 C 238,52 282,54 322,72 L 348,320 L 52,320 Z'
+            }
+            fill={`url(#kameez-${uid})`}
+            stroke="#B8AFA0"
+            strokeWidth="1"
+          />
+
+          {/* Kurta Collar & Placket Details */}
+          <path
+            d="M 168,56 L 200,98 L 232,56"
+            fill="none"
+            stroke={isLadies ? '#D4AF37' : '#A89F91'}
+            strokeWidth="2.5"
+          />
+          <line
+            x1="200"
+            y1="98"
+            x2="200"
+            y2="195"
+            stroke={isLadies ? '#D4AF37' : '#B8AFA0'}
+            strokeWidth="2"
+          />
+
+          {/* Drop Shadow of Draped Shawl onto Kurta */}
+          <path
+            d="M 88,76 C 122,64 155,62 174,68 L 170,294 C 132,298 95,294 68,282 Z"
+            fill="rgba(0,0,0,0.22)"
+            transform="translate(4, 6)"
+          />
+          <path
+            d="M 226,68 C 245,62 278,64 312,76 C 332,122 338,208 332,282 C 294,296 222,300 174,290 L 202,134 Z"
+            fill="rgba(0,0,0,0.25)"
+            transform="translate(-4, 6)"
+          />
+
+          {/* Real Shawl Photograph Mapped Inside the Shoulder Drape ClipPath */}
+          <g clipPath={`url(#shawl-drape-clip-${uid})`}>
+            <image
+              href={effectiveImage}
+              x="45"
+              y="45"
+              width="310"
+              height="265"
+              preserveAspectRatio="xMidYMid slice"
+            />
+            {isAlternateColorSelected && (
+              <rect
+                x="45"
+                y="45"
+                width="310"
+                height="265"
+                fill={activeHex}
+                style={{ mixBlendMode: 'color', opacity: 0.68 }}
+              />
+            )}
+            {/* 3D Studio Fold Shading Overlay */}
+            <rect
+              x="45"
+              y="45"
+              width="310"
+              height="265"
+              fill={`url(#fold-shadow-${uid})`}
+            />
+          </g>
+
+          {/* Drape Contour Fold Lines & Golden Border Accent */}
+          <path
+            d="M 172,66 L 166,288 M 228,66 L 204,132 L 178,286"
+            fill="none"
+            stroke="#D4AF37"
+            strokeWidth="2"
+            strokeOpacity="0.65"
+          />
+
+          {/* Hand-Knotted Bumble Tassels Hanging at Bottom of Draped Shawl */}
+          {Array.from({ length: 18 }).map((_, i) => {
+            const xPos = 76 + i * 14;
+            const yBase = i < 7 ? 283 : 287;
+            return (
+              <g key={i}>
+                <circle cx={xPos} cy={yBase} r="2.2" fill="#D4AF37" />
+                <path
+                  d={`M ${xPos},${yBase + 2} L ${xPos - 2},${yBase + 15} M ${xPos},${yBase + 2} L ${xPos + 2},${yBase + 15}`}
+                  stroke={activeHex === '#F5F2EB' || activeHex === '#EAE0C8' ? '#D6C7B2' : '#1E1B24'}
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                />
+              </g>
+            );
+          })}
+        </svg>
+
+        {/* Studio Angle Label Pill */}
+        <div className="absolute top-2.5 left-2.5 bg-[#1E1B24]/90 text-amber-300 text-[10px] font-bold px-2.5 py-1 rounded-md border border-amber-400/30 shadow-xs backdrop-blur-xs">
+          2/4 · {isLadies ? 'Ladies Shoulder Drape' : isYouth ? 'Youth Fit Drape' : 'Gents Shoulder Drape'}
+        </div>
+
+        {/* Active Color Swatch Indicator */}
+        <div className="absolute bottom-2.5 left-2.5 bg-white/95 text-stone-900 text-[10px] font-bold px-2.5 py-1 rounded-md border border-stone-300 shadow-xs flex items-center gap-1.5">
+          <span
+            className="w-2.5 h-2.5 rounded-full border border-stone-400 shrink-0"
+            style={{ backgroundColor: activeHex }}
+          />
+          <span className="truncate max-w-[140px]">{activeColorName}</span>
+        </div>
+      </div>
+    );
+  }
+
+  // ============================================================================
+  // STUDIO ANGLE 3: HANGING ON FOREARM / ARM DRAPE VIEW (Myntra Luxury Style)
+  // ============================================================================
+  if (viewMode === 'arm-drape' && hasValidImage) {
+    const uid = `${product.id}-arm`;
+    return (
+      <div
+        className={`relative overflow-hidden bg-gradient-to-br from-[#EFECE6] via-[#E2DACB] to-[#D2C7B4] select-none ${aspectClass} ${className}`}
+      >
+        <svg
+          viewBox="0 0 400 320"
+          className="w-full h-full object-cover"
+          preserveAspectRatio="xMidYMid slice"
+          aria-label={`${product.name} hanging on arm`}
+        >
+          <defs>
+            <clipPath id={`arm-drape-clip-${uid}`}>
+              <path d="M 118,86 C 165,80 235,80 282,86 L 296,268 C 240,276 160,276 104,268 Z" />
+            </clipPath>
+            <linearGradient id={`pleat-shade-${uid}`} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#000" stopOpacity="0.35" />
+              <stop offset="18%" stopColor="#fff" stopOpacity="0.1" />
+              <stop offset="34%" stopColor="#000" stopOpacity="0.28" />
+              <stop offset="52%" stopColor="#fff" stopOpacity="0.12" />
+              <stop offset="68%" stopColor="#000" stopOpacity="0.28" />
+              <stop offset="85%" stopColor="#fff" stopOpacity="0.08" />
+              <stop offset="100%" stopColor="#000" stopOpacity="0.38" />
+            </linearGradient>
+          </defs>
+
+          {/* Soft Studio Wall Panel Lines */}
+          <rect x="35" y="20" width="330" height="280" rx="14" fill="#FAF7F2" opacity="0.55" />
+
+          {/* Extended Tailored Sleeve & Forearm / Studio Bar Holding the Shawl */}
+          {/* Left Sleeve Cuff */}
+          <path
+            d="M 0,72 L 108,82 L 104,122 L 0,116 Z"
+            fill="#1E1B24"
+          />
+          <path d="M 96,81 L 108,82 L 104,122 L 92,121 Z" fill="#D4AF37" opacity="0.85" />
+
+          {/* Forearm & Hand Supporting the Folded Shawl */}
+          <path
+            d="M 106,86 L 298,88 C 312,88 322,95 322,104 C 322,113 310,118 295,118 L 104,116 Z"
+            fill="#C69568"
+          />
+
+          {/* Drop Shadow of Hanging Shawl */}
+          <path
+            d="M 122,92 L 286,92 L 300,276 L 110,276 Z"
+            fill="rgba(0,0,0,0.22)"
+            transform="translate(6, 8)"
+          />
+
+          {/* Folded Shawl Hanging Vertically Over the Forearm */}
+          <g clipPath={`url(#arm-drape-clip-${uid})`}>
+            <image
+              href={effectiveImage}
+              x="95"
+              y="75"
+              width="210"
+              height="205"
+              preserveAspectRatio="xMidYMid slice"
+            />
+            {isAlternateColorSelected && (
+              <rect
+                x="95"
+                y="75"
+                width="210"
+                height="205"
+                fill={activeHex}
+                style={{ mixBlendMode: 'color', opacity: 0.68 }}
+              />
+            )}
+            {/* Vertical Pleat Shadows */}
+            <rect
+              x="95"
+              y="75"
+              width="210"
+              height="205"
+              fill={`url(#pleat-shade-${uid})`}
+            />
+          </g>
+
+          {/* Top Rounded Fold Over the Forearm */}
+          <path
+            d="M 118,86 C 165,78 235,78 282,86"
+            fill="none"
+            stroke="#D4AF37"
+            strokeWidth="2.5"
+            strokeOpacity="0.7"
+          />
+
+          {/* Hand-Knotted Bumble Tassel Fringe Hanging at Bottom */}
+          {Array.from({ length: 15 }).map((_, i) => {
+            const xPos = 112 + i * 12.5;
+            return (
+              <g key={i}>
+                <circle cx={xPos} cy="270" r="2.4" fill="#D4AF37" />
+                <path
+                  d={`M ${xPos},272 L ${xPos - 2.5},292 M ${xPos},272 L ${xPos},294 M ${xPos},272 L ${xPos + 2.5},292`}
+                  stroke="#1E1B24"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </g>
+            );
+          })}
+        </svg>
+
+        <div className="absolute top-2.5 left-2.5 bg-[#1E1B24]/90 text-amber-300 text-[10px] font-bold px-2.5 py-1 rounded-md border border-amber-400/30 shadow-xs backdrop-blur-xs">
+          3/4 · Hanging on Arm &amp; Bumble Fall
+        </div>
+
+        <div className="absolute bottom-2.5 right-2.5 bg-white/95 text-stone-800 text-[10px] font-mono font-bold px-2.5 py-1 rounded-md border border-stone-300 shadow-xs">
+          {product.weightGrams ? `${product.weightGrams}g Drape` : product.material}
+        </div>
+      </div>
+    );
+  }
+
+  // ============================================================================
+  // STUDIO ANGLE 4: MACRO BORDER, EMBROIDERY & TASSEL CLOSE-UP VIEW
+  // ============================================================================
+  if (viewMode === 'macro-zoom' && hasValidImage) {
+    return (
+      <div className={`relative overflow-hidden bg-[#1E1B24] select-none ${aspectClass} ${className}`}>
+        <div className="w-full h-full overflow-hidden">
+          <img
+            src={effectiveImage}
+            alt={`${product.name} border and weave macro close-up`}
+            loading="lazy"
+            onError={() => setImgError(true)}
+            className="w-full h-full object-cover object-bottom scale-[1.85] origin-bottom transition-transform duration-500"
+          />
+          {isAlternateColorSelected && (
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                backgroundColor: activeHex,
+                mixBlendMode: 'color',
+                opacity: 0.65,
+              }}
+            />
+          )}
+        </div>
+
+        {/* Subtle Macro Loupe Frame */}
+        <div className="absolute inset-2.5 border border-amber-300/40 rounded-lg pointer-events-none" />
+
+        <div className="absolute top-2.5 left-2.5 bg-[#1E1B24]/90 text-amber-300 text-[10px] font-bold px-2.5 py-1 rounded-md border border-amber-400/30 shadow-xs backdrop-blur-xs">
+          4/4 · Pallu Border &amp; Bumble Zoom (2.0×)
+        </div>
+
+        <div className="absolute bottom-2.5 inset-x-2.5 bg-[#1E1B24]/90 text-stone-100 text-[10px] px-3 py-1.5 rounded-md border border-stone-700 flex items-center justify-between gap-2 backdrop-blur-xs">
+          <span className="font-semibold truncate">{product.style}</span>
+          <span className="font-mono text-amber-300 shrink-0">{product.material}</span>
+        </div>
+      </div>
+    );
+  }
+
+  // ============================================================================
+  // STUDIO ANGLE 1 (DEFAULT): FULL SHAWL & PALLU DISPLAY
+  // ============================================================================
+  if (hasValidImage) {
+    return (
+      <div className={`relative overflow-hidden bg-[#E5DEC9] ${aspectClass} ${className}`}>
+        <img
+          src={effectiveImage}
+          alt={`${product.name} - ${activeColorName}`}
+          loading="lazy"
+          onError={() => setImgError(true)}
+          className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-103"
+        />
+
+        {/* Dynamic Studio Color Swatch Tint when customer selects an alternate color */}
+        {isAlternateColorSelected && (
+          <div
+            className="absolute inset-0 pointer-events-none transition-colors duration-300"
+            style={{
+              backgroundColor: activeHex,
+              mixBlendMode: 'color',
+              opacity: 0.65,
+            }}
+          />
+        )}
+
+        {isAlternateColorSelected && (
+          <div className="absolute top-2.5 right-2.5 bg-white/95 text-stone-900 text-[10px] font-bold px-2.5 py-1 rounded-md border border-stone-300 shadow-xs flex items-center gap-1.5 backdrop-blur-xs">
+            <span
+              className="w-2.5 h-2.5 rounded-full border border-stone-400 shrink-0"
+              style={{ backgroundColor: activeHex }}
+            />
+            <span>Color: {activeColorName}</span>
+          </div>
+        )}
+
         {showOverlayCode && (
-          <span className="absolute bottom-2.5 left-2.5 z-20 rounded bg-stone-900/85 px-2 py-0.5 text-[11px] font-mono text-white backdrop-blur-xs">
-            {product.code}
-          </span>
+          <div className="absolute bottom-2.5 left-2.5 bg-[#1E1B24]/85 text-amber-300 text-[11px] font-mono px-2.5 py-0.5 rounded border border-amber-400/30 backdrop-blur-xs">
+            {product.code} · {product.material}
+          </div>
         )}
       </div>
     );
   }
 
-  // Studio Backdrop + Realistic Folded Shawl / Garment Illustration
+  // ============================================================================
+  // INTRICATE SVG TEXTILE WEAVE FALLBACK (Zero Broken Images Guarantee)
+  // ============================================================================
+  const accentColor =
+    product.category === 'ladies'
+      ? '#EAB308'
+      : product.category === 'gents'
+      ? '#D97706'
+      : product.category === 'bechgana'
+      ? '#F59E0B'
+      : product.category === 'laungi'
+      ? '#FACC15'
+      : '#94A3B8';
+
+  const patternId = `pattern-${product.id}-${product.patternType}`;
+
   return (
     <div
-      className={`relative overflow-hidden select-none flex items-center justify-center bg-stone-200/80 ${aspectClass} ${className}`}
-      style={{
-        background: 'linear-gradient(145deg, #f5f5f4 0%, #e7e5e4 55%, #d6d3d1 100%)',
-      }}
+      className={`relative overflow-hidden select-none ${aspectClass} ${className}`}
+      style={{ backgroundColor: activeHex }}
     >
-      {/* Subtle Studio Wooden / Stone Pedestal Base */}
-      <div className="absolute bottom-0 inset-x-0 h-1/4 bg-gradient-to-t from-stone-300/90 to-transparent pointer-events-none" />
-
-      {/* Realistic Folded Shawl Swatch */}
       <div
-        className={`relative transition-transform duration-300 group-hover:scale-[1.03] shadow-xl rounded-md overflow-hidden flex flex-col justify-between ${
-          isCompact ? 'w-[84%] h-[84%] p-2' : 'w-[82%] h-[78%] p-3.5'
-        }`}
+        className="absolute inset-0 opacity-90"
         style={{
-          backgroundColor: product.colorHex || '#292524',
-          boxShadow: '0 14px 28px -8px rgba(28, 25, 23, 0.38), 0 4px 10px -2px rgba(28, 25, 23, 0.2)',
+          background: `radial-gradient(circle at 30% 25%, rgba(255,255,255,0.16) 0%, rgba(0,0,0,0.22) 70%, rgba(0,0,0,0.48) 100%)`,
         }}
+      />
+
+      <svg
+        className="absolute inset-0 w-full h-full opacity-35"
+        xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Realistic Fabric Fold Highlights & Crease Shadows */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              'linear-gradient(110deg, rgba(255,255,255,0.14) 0%, rgba(0,0,0,0.08) 28%, rgba(255,255,255,0.18) 48%, rgba(0,0,0,0.22) 76%, rgba(255,255,255,0.08) 100%)',
-          }}
-        />
-
-        {/* Fine Woven Thread Texture */}
-        <div
-          className="absolute inset-0 opacity-25 mix-blend-overlay pointer-events-none"
-          style={{
-            backgroundImage:
-              'repeating-linear-gradient(45deg, rgba(255,255,255,0.18) 0, rgba(255,255,255,0.18) 1px, transparent 0, transparent 3px), repeating-linear-gradient(-45deg, rgba(0,0,0,0.22) 0, rgba(0,0,0,0.22) 1px, transparent 0, transparent 3px)',
-            backgroundSize: '6px 6px',
-          }}
-        />
-
-        {/* Pattern-Specific Traditional Embroidery & Weave Borders */}
-        {product.patternType === 'royal-velvet' && (
-          <>
-            <div className="absolute inset-2 border-2 border-amber-300/75 rounded-xs pointer-events-none">
-              <div className="absolute inset-1 border border-dashed border-amber-200/50" />
-            </div>
-            {!isCompact && (
-              <>
-                <svg
-                  className="absolute top-3 left-3 w-7 h-7 text-amber-300/85 pointer-events-none"
-                  viewBox="0 0 40 40"
-                  fill="currentColor"
-                >
-                  <path d="M0,0 L22,0 C22,12 12,22 0,22 Z" />
-                  <circle cx="9" cy="9" r="2.5" fill="#fff" />
-                </svg>
-                <svg
-                  className="absolute bottom-3 right-3 w-7 h-7 text-amber-300/85 pointer-events-none rotate-180"
-                  viewBox="0 0 40 40"
-                  fill="currentColor"
-                >
-                  <path d="M0,0 L22,0 C22,12 12,22 0,22 Z" />
-                  <circle cx="9" cy="9" r="2.5" fill="#fff" />
-                </svg>
-              </>
-            )}
-          </>
-        )}
-
-        {product.patternType === 'kashmiri' && (
-          <>
-            <div className="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
-              <svg
-                className={isCompact ? 'w-12 h-12 text-amber-200' : 'w-24 h-24 text-amber-200'}
-                viewBox="0 0 100 100"
+        <defs>
+          {product.patternType === 'kashmiri' && (
+            <pattern id={patternId} width="48" height="48" patternUnits="userSpaceOnUse">
+              <path
+                d="M24 4 C32 4, 40 12, 40 24 C40 36, 28 44, 24 44 C20 44, 8 36, 8 24 C8 12, 16 4, 24 4 Z"
                 fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M50 85 C 30 85, 20 65, 20 45 C 20 25, 40 15, 55 15 C 65 15, 75 25, 75 40 C 75 60, 60 70, 50 85 Z" />
-                <circle cx="50" cy="50" r="11" />
-              </svg>
-            </div>
-            <div className="absolute inset-x-0 bottom-0 h-3 bg-amber-400/25 border-t border-amber-300/50 pointer-events-none" />
-          </>
-        )}
+                stroke={accentColor}
+                strokeWidth="1.2"
+              />
+              <circle cx="24" cy="24" r="5" fill="none" stroke={accentColor} strokeWidth="1" />
+            </pattern>
+          )}
+          {product.patternType !== 'kashmiri' && (
+            <pattern id={patternId} width="32" height="32" patternUnits="userSpaceOnUse">
+              <path
+                d="M16 2 L30 16 L16 30 L2 16 Z"
+                fill="none"
+                stroke={accentColor}
+                strokeWidth="1.2"
+              />
+              <circle cx="16" cy="16" r="3" fill={accentColor} />
+            </pattern>
+          )}
+        </defs>
+        <rect width="100%" height="100%" fill={`url(#${patternId})`} />
+      </svg>
 
-        {product.patternType === 'paisley' && (
-          <div className="absolute inset-2.5 border border-amber-200/50 flex items-center justify-center pointer-events-none">
-            <svg
-              className={isCompact ? 'w-10 h-10 text-amber-100/40' : 'w-20 h-20 text-amber-100/40'}
-              viewBox="0 0 100 100"
-              fill="currentColor"
-            >
-              <path d="M50,12 C65,12 78,26 78,45 C78,68 55,84 50,88 C45,84 22,68 22,45 C22,26 35,12 50,12 Z M50,30 C42,30 35,37 35,45 C35,58 50,68 50,68 C50,68 65,58 65,45 C65,37 58,30 50,30 Z" />
-            </svg>
-          </div>
-        )}
-
-        {product.patternType === 'herringbone' && (
-          <>
-            <div
-              className="absolute inset-0 opacity-35 pointer-events-none"
-              style={{
-                backgroundImage:
-                  'linear-gradient(135deg, rgba(255,255,255,0.18) 25%, transparent 25%), linear-gradient(225deg, rgba(255,255,255,0.18) 25%, transparent 25%)',
-                backgroundSize: '16px 16px',
-              }}
-            />
-            {/* Swati Traditional Geometric Woven Patti */}
-            <div className="absolute bottom-2.5 inset-x-0 h-5 bg-stone-950/65 border-y border-amber-400/60 flex items-center justify-around px-2 pointer-events-none">
-              {[...Array(isCompact ? 4 : 8)].map((_, i) => (
-                <span key={i} className="text-[9px] text-amber-300 font-mono">
-                  ◆
-                </span>
-              ))}
-            </div>
-          </>
-        )}
-
-        {product.patternType === 'geometric' && (
-          <div
-            className="absolute inset-0 opacity-30 pointer-events-none"
-            style={{
-              backgroundImage:
-                'repeating-linear-gradient(0deg, rgba(255,255,255,0.22), rgba(255,255,255,0.22) 10px, transparent 10px, transparent 20px), repeating-linear-gradient(90deg, rgba(255,255,255,0.22), rgba(255,255,255,0.22) 10px, transparent 10px, transparent 20px)',
-            }}
-          />
-        )}
-
-        {product.patternType === 'laungi-stripe' && (
-          <div
-            className="absolute inset-0 opacity-75 pointer-events-none"
-            style={{
-              backgroundImage:
-                'repeating-linear-gradient(90deg, #B45309 0, #B45309 14px, #1E3A8A 14px, #1E3A8A 28px, #991B1B 28px, #991B1B 38px, #065F46 38px, #065F46 50px, #D97706 50px, #D97706 55px)',
-            }}
-          />
-        )}
-
-        {/* Center Woven Cloth Label Tag */}
-        {!isCompact ? (
-          <div className="relative z-10 m-auto bg-stone-950/80 border border-amber-300/50 px-3.5 py-2 rounded-xs text-center backdrop-blur-xs shadow-md max-w-[85%]">
-            <p className="text-[9px] font-mono uppercase tracking-widest text-amber-300">
-              {product.material}
-            </p>
-            <p className="font-serif-luxury text-xs sm:text-sm font-bold text-white leading-snug line-clamp-1 mt-0.5">
-              {product.style}
-            </p>
-            <p className="text-[10px] text-stone-300 mt-0.5">
-              Bari Textile · Multan
-            </p>
-          </div>
-        ) : (
-          <div className="relative z-10 m-auto bg-stone-950/75 border border-amber-300/40 px-1.5 py-0.5 rounded-xs text-center">
-            <span className="text-[9px] font-mono text-amber-200">{product.code}</span>
-          </div>
-        )}
+      <div
+        className="absolute inset-3 border-2 pointer-events-none flex flex-col justify-between p-2"
+        style={{ borderColor: `${accentColor}66` }}
+      >
+        <div className="border-t border-dashed w-full" style={{ borderColor: `${accentColor}55` }} />
+        <div className="border-b-4 border-double w-full" style={{ borderColor: `${accentColor}99` }} />
       </div>
 
-      {/* Realistic Shawl Fringe Tassels at Bottom Edge */}
-      {!isCompact && (
-        <div className="absolute bottom-2 inset-x-12 flex justify-between px-4 opacity-50 pointer-events-none">
-          {[...Array(18)].map((_, idx) => (
-            <span
-              key={idx}
-              className="w-[1.5px] h-2.5 bg-stone-600 rounded-full"
-            />
-          ))}
+      <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between pointer-events-none">
+        <div className="bg-stone-950/75 backdrop-blur-xs px-2.5 py-1 rounded border border-amber-400/30">
+          <p className="text-[10px] uppercase tracking-widest text-amber-300 font-mono">
+            {product.material}
+          </p>
+          <p className="text-[11px] text-stone-200 font-serif-luxury italic truncate max-w-[190px]">
+            {product.style}
+          </p>
         </div>
-      )}
-
-      {/* Corner Item Code & Color Swatch */}
-      {!isCompact && (
-        <>
-          <span className="absolute top-2.5 right-2.5 bg-white/90 text-stone-800 border border-stone-300/80 px-2 py-0.5 rounded-xs text-[10px] font-mono font-semibold shadow-2xs">
-            {product.code}
-          </span>
-          <span className="absolute bottom-2.5 left-3 bg-white/90 text-stone-800 border border-stone-300/80 px-2 py-0.5 rounded-xs text-[10px] font-medium flex items-center gap-1.5 shadow-2xs">
-            <span
-              className="w-2.5 h-2.5 rounded-full border border-stone-400"
-              style={{ backgroundColor: product.colorHex }}
-            />
-            {product.color}
-          </span>
-        </>
-      )}
+      </div>
     </div>
   );
 };

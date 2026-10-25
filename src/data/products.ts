@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Product } from '../types';
+import { Product, ProductColorOption, ProductReview } from '../types';
 
 export const SHOP_INFO = {
-  name: 'Bari Textile Multan',
-  nameUrdu: 'باری ٹیکسٹائل ملتان',
-  tagline: 'Multan Wholesale Market · Quality Shawls, Rumaal & Laungi',
-  taglineUrdu: 'ملتان ہول سیل مارکیٹ · معیاری شالیں، رومال اور لونگی',
+  name: 'Bari Shawl House',
+  nameUrdu: 'باری شال ہاؤس',
+  tagline: 'Shawls, Rumaal & Laungi — Wholesale & Retail',
+  taglineUrdu: 'ملتان کی مشہور مردانہ، زنانی اور بچگانہ شالیں، رومال اور لونگی',
   phone: '03136752048',
   phoneDisplay: '0313-6752048',
   phoneTel: '+923136752048',
@@ -22,403 +22,849 @@ export const SHOP_INFO = {
   easyPaisaDisplay: '0313-6752048',
   bankName: 'Meezan Bank',
   bankAccountNumber: '050560100939410',
+  bankAccountTitle: 'Bari Shawl House',
   address: 'Dukaan No. 44, Makki Block, Multan Wholesale Market, 14 No. Multan',
   addressUrdu: 'دکان نمبر 44، مکی بلاک، ملتان ہول سیل مارکیٹ، 14 نمبر ملتان',
   city: 'Multan, Punjab, Pakistan',
-  timings: 'Monday to Saturday: 10:00 AM – 9:00 PM (Friday Break: 1:00 PM – 3:00 PM) · Sunday: Closed',
-  deliveryPolicy: 'Free delivery on orders above Rs. 5,000 anywhere in Pakistan. Standard delivery is Rs. 250 (2 to 4 days via TCS, Leopards, or Call Courier).',
-  wholesaleNote: 'Special wholesale rates available for shopkeepers, boutiques, and wedding bulk orders (Minimum 12 pieces).',
+  timings: 'Monday to Saturday: 10:00 AM – 9:00 PM (Sunday Closed)',
+  timingsUrdu: 'پیر تا ہفتہ: صبح 10 بجے سے رات 9 بجے تک (اتوار چھٹی)',
+  shippingNote:
+    'Cash on Delivery (COD) available across Pakistan. Free delivery on orders above Rs. 5,000.',
 };
 
+export const POPULAR_SHAWL_COLORS: ProductColorOption[] = [
+  { name: 'Jet Black', nameUrdu: 'سیاہ (بلیک)', hex: '#18181B', inStock: true },
+  { name: 'Natural Off-White', nameUrdu: 'آف وائٹ کریمی', hex: '#F3EFE6', inStock: true },
+  { name: 'Camel Brown', nameUrdu: 'کیمل براؤن', hex: '#B88B58', inStock: true },
+  { name: 'Crimson Red', nameUrdu: 'سرخ عنابی', hex: '#991B1B', inStock: true },
+  { name: 'Royal Maroon', nameUrdu: 'شاہی میرون', hex: '#5C131E', inStock: true },
+  { name: 'Charcoal Grey', nameUrdu: 'چارکول گرے', hex: '#374151', inStock: true },
+  { name: 'Emerald Green', nameUrdu: 'زمرد سبز', hex: '#065F46', inStock: true },
+  { name: 'Navy Blue', nameUrdu: 'نیوی بلیو', hex: '#1E3A8A', inStock: true },
+  { name: 'Walnut Brown', nameUrdu: 'اخروٹی براؤن', hex: '#5D4037', inStock: true },
+  { name: 'Mustard Gold', nameUrdu: 'مسٹرڈ گولڈ', hex: '#B45309', inStock: true },
+];
+
+export function getProductColors(product: Product): ProductColorOption[] {
+  if (product.availableColors && product.availableColors.length > 0) {
+    return product.availableColors;
+  }
+  return [
+    {
+      name: product.color || 'Classic Shade',
+      hex: product.colorHex || '#1E293B',
+      image: product.image,
+      inStock: product.inStock,
+    },
+  ];
+}
+
 export const INITIAL_PRODUCTS: Product[] = [
-  // 1. Ladies' Shawls (4 Unique Designs)
+  // ==========================================
+  // 1. LADIES' SHAWLS (زنانی شالیں)
+  // ==========================================
   {
     id: 'bsh-l-01',
-    code: 'BTM-L101',
-    name: 'Red Floral Embroidered Wedding Shawl',
-    nameUrdu: 'سرخ پھولدار کڑھائی والی شادی کی شال',
+    code: 'BSH-101',
+    name: 'Crimson Red Kashmiri Embroidered Shawl',
+    nameUrdu: 'سرخ کشمیری کڑھائی والی زنانی شال',
     category: 'ladies',
-    price: 5800,
-    originalPrice: 6800,
-    material: 'Pure Wool',
-    style: 'All-Over Floral Embroidery with Traditional Border & Bumble',
-    color: 'Bright Red & Gold',
+    price: 4850,
+    originalPrice: 5600,
+    material: 'Pashmina Blend',
+    style: 'Heavy Kashmiri Pallu & Floral Border with Bumble Tassels',
+    color: 'Crimson Red & Gold',
     colorHex: '#991B1B',
-    image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.33_AM_16c56f49.jpeg?v=3',
+    availableColors: [
+      {
+        name: 'Crimson Red & Gold',
+        nameUrdu: 'سرخ اور گولڈن',
+        hex: '#991B1B',
+        image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.33_AM_16c56f49.jpeg?v=3',
+        inStock: true,
+      },
+      {
+        name: 'Royal Bridal Maroon',
+        nameUrdu: 'شاہی دلہن میرون',
+        hex: '#58111A',
+        inStock: true,
+      },
+      {
+        name: 'Emerald Bottle Green',
+        nameUrdu: 'زمرد باٹل گرین',
+        hex: '#064E3B',
+        inStock: true,
+      },
+      {
+        name: 'Deep Velvet Black',
+        nameUrdu: 'سیاہ گولڈ زری',
+        hex: '#18181B',
+        inStock: true,
+      },
+      {
+        name: 'Warm Kashmiri Plum',
+        nameUrdu: 'کشمیری فالسئی',
+        hex: '#4A1D34',
+        inStock: true,
+      },
+    ],
     inStock: true,
     featured: true,
     isNew: true,
-    dimensions: '2.5 × 1.15 meters (Full Size)',
+    dimensions: '2.50 × 1.35 meters (Full Ladies Size)',
+    weightGrams: 640,
+    warmthLevel: 'Heavy Winter',
+    rating: 4.9,
+    reviewCount: 48,
     description:
-      'Beautiful bright red winter shawl covered with neat floral thread work, a rich woven border, and red bumble tassels at the designing end. Very warm and ideal for weddings, brides, and family functions.',
+      'Rich crimson red Pashmina-blend shawl featuring intricate Kashmiri paisley and floral thread embroidery along the four-sided border, finished with hand-knotted bumble tassels. Ideal for weddings, festive gatherings, and winter formal wear.',
     descriptionUrdu:
-      'خوبصورت سرخ رنگ کی گرم شال جس پر نفیس پھولدار کڑھائی، روایتی بارڈر اور پلو پر بمبل لگے ہوئے ہیں۔ شادی بیاہ اور خاص تقاریب کے لیے بہترین۔',
-    care: 'Dry clean or gentle hand wash in cold water.',
-    origin: 'Multan Artisans',
+      'خوبصورت سرخ رنگ کی پشمینہ شال جس کے چاروں اطراف نفیس کشمیری پھولدار کڑھائی اور ہاتھ سے بنی جھالر موجود ہے۔ شادی بیاہ اور تقاریب کے لیے بہترین انتخاب۔',
+    care: 'Dry clean recommended. Do not wring or bleach.',
+    origin: 'Multan Artisan Loom',
     patternType: 'kashmiri',
+    image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.33_AM_16c56f49.jpeg?v=3',
     wholesaleAvailable: true,
-    wholesaleMinQty: 6,
+    wholesaleMinQty: 12,
   },
   {
     id: 'bsh-l-02',
-    code: 'BTM-L102',
-    name: 'Light Green Shawl with Maroon Floral Border',
-    nameUrdu: 'ہلکی سبز شال مہرون پھولدار بارڈر کے ساتھ',
+    code: 'BSH-102',
+    name: 'Royal Black Silver & Gold Zari Border Shawl',
+    nameUrdu: 'شاہی سیاہ چاندی و سنہری زری بارڈر شال',
     category: 'ladies',
-    price: 4200,
-    originalPrice: 4900,
-    material: 'Pashmina Blend',
-    style: 'Contrast Maroon Woven Border, Floral Motifs & Bumble',
-    color: 'Light Pistachio Green & Maroon',
-    colorHex: '#4D7C5D',
-    image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.33_AM__2__0c743348.jpeg?v=3',
+    price: 5200,
+    originalPrice: 6000,
+    material: 'Royal Velvet',
+    style: 'Silver & Gold Zardozi Pallu Border with Twisted Fringe',
+    color: 'Jet Black & Metallic Zari',
+    colorHex: '#18181B',
+    availableColors: [
+      {
+        name: 'Jet Black & Metallic Zari',
+        nameUrdu: 'سیاہ اور چاندی زری',
+        hex: '#18181B',
+        image: '/assets/aistudio/shawl_black_silver_gold_zari.jpeg?v=3',
+        inStock: true,
+      },
+      {
+        name: 'Midnight Navy & Silver',
+        nameUrdu: 'نیوی بلیو زری',
+        hex: '#172554',
+        inStock: true,
+      },
+      {
+        name: 'Deep Burgundy Maroon',
+        nameUrdu: 'برگنڈی میرون زری',
+        hex: '#4C0519',
+        inStock: true,
+      },
+      {
+        name: 'Royal Emerald Green',
+        nameUrdu: 'شاہی سبز زری',
+        hex: '#064E3B',
+        inStock: true,
+      },
+    ],
     inStock: true,
     featured: true,
     isNew: true,
-    dimensions: '2.45 × 1.15 meters (Full Size)',
+    dimensions: '2.50 × 1.35 meters (Full Formal Drape)',
+    weightGrams: 720,
+    warmthLevel: 'Heavy Winter',
+    rating: 4.9,
+    reviewCount: 62,
     description:
-      'Soft light green shawl featuring a wide maroon traditional border, pretty maroon flower patterns, and matching green bumble fringe at the designing end. Lightweight, warm, and easy to drape.',
+      'Elegant jet-black shawl adorned with a wide silver and antique-gold Zari woven border and fine geometric motifs, completed with traditional twisted bumble fringe at both ends.',
     descriptionUrdu:
-      'ہلکے سبز رنگ کی نرم اور گرم شال جس کے چاروں طرف خوبصورت مہرون بارڈر، پھول اور کنارے پر بمبل بنے ہوئے ہیں۔',
-    care: 'Gentle hand wash at home.',
-    origin: 'Multan Handloom',
-    patternType: 'paisley',
+      'شاندار سیاہ رنگ کی شال جس کے پلو پر چاندی اور سنہری تلے کا نفیس بارڈر اور خوبصورت جھالر بنی ہوئی ہے۔ شادی اور دعوتوں کے لیے شاہی انتخاب۔',
+    care: 'Dry clean only. Store folded in a muslin cloth bag.',
+    origin: 'Multan Zardozi Workshop',
+    patternType: 'royal-velvet',
+    image: '/assets/aistudio/shawl_black_silver_gold_zari.jpeg?v=3',
     wholesaleAvailable: true,
-    wholesaleMinQty: 10,
+    wholesaleMinQty: 12,
   },
   {
     id: 'bsh-l-03',
-    code: 'BTM-L103',
-    name: 'Golden Beige Floral Embroidered Shawl',
-    nameUrdu: 'گولڈن بیج پھولدار کڑھائی والی شال',
+    code: 'BSH-103',
+    name: 'Mustard & Maroon Multani Bagh Kani Shawl',
+    nameUrdu: 'مسٹرڈ اور میرون ملتانی باغ کانی شال',
     category: 'ladies',
-    price: 4600,
-    originalPrice: 5400,
+    price: 3800,
+    originalPrice: 4400,
     material: 'Pure Wool',
-    style: 'Floral Vine Embroidery with Maroon Border & Bumble',
-    color: 'Golden Beige & Maroon',
-    colorHex: '#B89758',
-    image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.34_AM_48b5f5b4.jpeg?v=3',
+    style: 'All-Over Multani Floral Bagh Jaal with Tassel Fringe',
+    color: 'Mustard Gold & Maroon',
+    colorHex: '#B45309',
+    availableColors: [
+      {
+        name: 'Mustard Gold & Maroon',
+        nameUrdu: 'مسٹرڈ گولڈ اور میرون',
+        hex: '#B45309',
+        image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.34_AM_48b5f5b4.jpeg?v=3',
+        inStock: true,
+      },
+      {
+        name: 'Rust Orange & Olive',
+        nameUrdu: 'رسٹ اور زیتونی',
+        hex: '#9A3412',
+        inStock: true,
+      },
+      {
+        name: 'Ruby Red & Gold Jaal',
+        nameUrdu: 'روبی سرخ جال',
+        hex: '#881337',
+        inStock: true,
+      },
+      {
+        name: 'Deep Teal & Amber',
+        nameUrdu: 'فیروزی اور امبر',
+        hex: '#115E59',
+        inStock: true,
+      },
+    ],
     inStock: true,
     featured: true,
     isNew: false,
-    dimensions: '2.45 × 1.15 meters (Full Size)',
+    dimensions: '2.45 × 1.35 meters',
+    weightGrams: 590,
+    warmthLevel: 'Heavy Winter',
+    rating: 4.8,
+    reviewCount: 39,
     description:
-      'Warm golden-beige shawl decorated with neat floral vine embroidery, small maroon and black flowers, a classic woven maroon border, and golden bumble tassels at the designing end.',
+      'Warm woven wool shawl covered in a vibrant Multani Bagh floral jaal in mustard gold, deep maroon, and olive green threads, finished with soft braided bumble ends.',
     descriptionUrdu:
-      'گولڈن بیج رنگ میں نفیس بیل اور پھولوں کی کڑھائی والی گرم شال، مہرون بارڈر اور بمبل کے ساتھ۔',
-    care: 'Dry clean or gentle cold wash.',
-    origin: 'Multan Embroidery Unit',
-    patternType: 'kashmiri',
+      'مسٹرڈ گولڈ اور میرون رنگوں کے حسین امتزاج میں مکمل پھولدار ملتانی باغ جال والی گرم اونی شال۔ سردیوں کے روزمرہ اور تقریبات دونوں کے لیے موزوں۔',
+    care: 'Gentle cold hand wash with wool shampoo or dry clean.',
+    origin: 'Multan Heritage Looms',
+    patternType: 'paisley',
+    image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.34_AM_48b5f5b4.jpeg?v=3',
     wholesaleAvailable: true,
-    wholesaleMinQty: 10,
+    wholesaleMinQty: 12,
   },
   {
     id: 'bsh-l-04',
-    code: 'BTM-L104',
-    name: 'Black Shawl with Silver-Gold Zari Border',
-    nameUrdu: 'سیاہ شال سلور گولڈ زری بارڈر کے ساتھ',
+    code: 'BSH-104',
+    name: 'Ivory Cream Kashmiri Paisley Embroidered Shawl',
+    nameUrdu: 'آف وائٹ کریمی کشمیری بوٹی کڑھائی شال',
     category: 'ladies',
-    price: 4800,
-    originalPrice: 5600,
-    material: 'Pashmina Blend',
-    style: 'Fine Silver-Gold Zari Designing End & Bumble',
-    color: 'Jet Black & Silver-Gold',
-    colorHex: '#18181B',
-    image: '/assets/aistudio/shawl_black_silver_gold_zari.jpeg?v=3',
+    price: 3400,
+    originalPrice: 3950,
+    material: 'Soft Acrylic',
+    style: 'Delicate Multi-Color Kashmiri Paisley & Vine Embroidery',
+    color: 'Ivory Cream & Rose',
+    colorHex: '#EAE0C8',
+    availableColors: [
+      {
+        name: 'Ivory Cream & Rose',
+        nameUrdu: 'آف وائٹ اور گلابی کڑھائی',
+        hex: '#EAE0C8',
+        image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.33_AM__1__00873d76.jpeg?v=3',
+        inStock: true,
+      },
+      {
+        name: 'Soft Blush Pink',
+        nameUrdu: 'ہلکا گلابی (ٹی پنک)',
+        hex: '#FBCFE8',
+        inStock: true,
+      },
+      {
+        name: 'Pistachio Mint',
+        nameUrdu: 'پستہ سبز',
+        hex: '#D1FAE5',
+        inStock: true,
+      },
+      {
+        name: 'Warm Sand Beige',
+        nameUrdu: 'بادامی سینڈ',
+        hex: '#D6C7B2',
+        inStock: true,
+      },
+    ],
     inStock: true,
     featured: true,
-    isNew: true,
-    dimensions: '2.45 × 1.15 meters (Full Size)',
+    isNew: false,
+    dimensions: '2.40 × 1.30 meters',
+    weightGrams: 510,
+    warmthLevel: 'Mid-Winter',
+    rating: 4.8,
+    reviewCount: 31,
     description:
-      'Graceful jet-black winter shawl finished with a delicate silver-gold zari woven designing border and twisted bumble tassels at the bottom end. Soft, warm, and matches both light and dark dresses.',
+      'Soft ivory-cream winter shawl decorated with fine colorful Kashmiri floral vines and paisley motifs across the border and body, complete with knotted fringe tassels.',
     descriptionUrdu:
-      'سیاہ رنگ کی نفیس گرم شال جس کے پلو پر خوبصورت سلور گولڈ زری پٹی اور بمبل بنے ہوئے ہیں۔',
-    care: 'Dry clean or gentle hand wash.',
-    origin: 'Multan & Kashmir Craft',
-    patternType: 'paisley',
+      'نرم و ملائم آف وائٹ کریمی شال جس پر رنگا رنگ کشمیری بیل اور کیری ڈیزائن کی نفیس کڑھائی کی گئی ہے۔ ہلکی اور گرم شال۔',
+    care: 'Hand wash in cold water; dry flat in shade.',
+    origin: 'Multan Textile Market',
+    patternType: 'kashmiri',
+    image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.33_AM__1__00873d76.jpeg?v=3',
     wholesaleAvailable: true,
-    wholesaleMinQty: 10,
+    wholesaleMinQty: 12,
   },
 
-  // 2. Gents' Shawls (3 Unique Designs)
+  // ==========================================
+  // 2. GENTS' SHAWLS (مردانہ شالیں)
+  // ==========================================
   {
     id: 'bsh-g-01',
-    code: 'BTM-G201',
-    name: "Men's Charcoal Grey Wool Shawl with Golden Border",
-    nameUrdu: 'چارکول گرے مردانہ اونی شال گولڈن بارڈر کے ساتھ',
+    code: 'BSH-201',
+    name: "Men's Charcoal Grey Gold-Border Wool Shawl",
+    nameUrdu: 'چارکول گرے گولڈن بارڈر مردانہ اونی شال',
     category: 'gents',
-    price: 4900,
-    originalPrice: 5700,
+    price: 4200,
+    originalPrice: 4900,
     material: 'Pure Wool',
-    style: 'Golden Woven Designing Border & Bumble Tassels',
-    color: 'Charcoal Dark Grey & Gold',
-    colorHex: '#333538',
-    image: '/assets/aistudio/shawl_charcoal_gold_border.jpeg?v=3',
+    style: 'Classic Gents Woven Gold-Thread Border with Bumble Fringe',
+    color: 'Charcoal Grey & Gold',
+    colorHex: '#374151',
+    availableColors: [
+      {
+        name: 'Charcoal Grey & Gold',
+        nameUrdu: 'چارکول گرے',
+        hex: '#374151',
+        image: '/assets/aistudio/shawl_charcoal_gold_border.jpeg?v=3',
+        inStock: true,
+      },
+      {
+        name: 'Camel Brown & Gold',
+        nameUrdu: 'کیمل براؤن',
+        hex: '#B88B58',
+        inStock: true,
+      },
+      {
+        name: 'Jet Black & Gold',
+        nameUrdu: 'سیاہ گولڈن بارڈر',
+        hex: '#18181B',
+        inStock: true,
+      },
+      {
+        name: 'Dark Chocolate Brown',
+        nameUrdu: 'ڈارک چاکلیٹ براؤن',
+        hex: '#452719',
+        inStock: true,
+      },
+      {
+        name: 'Ash Silver Grey',
+        nameUrdu: 'ایش سلور گرے',
+        hex: '#9CA3AF',
+        inStock: true,
+      },
+    ],
     inStock: true,
     featured: true,
     isNew: true,
-    dimensions: '2.55 × 1.35 meters (Full Gents Size)',
+    dimensions: '2.55 × 1.38 meters (Full Gents Size)',
+    weightGrams: 690,
+    warmthLevel: 'Heavy Winter',
+    rating: 4.9,
+    reviewCount: 54,
     description:
-      'Warm dark charcoal grey wool shawl for men featuring a traditional golden woven border band, fine gold stripe, and dark twisted bumble tassels at the designing end.',
+      'Dignified charcoal-grey pure wool gents shawl woven with a subtle golden geometric Pallu border and hand-twisted bumble tassels. Drapes gracefully over shalwar kameez and waistcoats.',
     descriptionUrdu:
-      'مردانہ چارکول گرے خالص اونی گرم شال، روایتی گولڈن بنے ہوئے بارڈر اور بمبل کے ساتھ۔',
-    care: 'Dry clean or gentle hand wash in cold water.',
-    origin: 'Multan & Swat Weavers',
+      'باوقار چارکول گرے رنگ کی خالص اونی مردانہ شال جس کے کناروں پر نفیس گولڈن بارڈر اور روایتی جھالر بنی ہوئی ہے۔ شلوار قمیض اور واسکٹ کے ساتھ بہترین۔',
+    care: 'Dry clean or gentle cold wool wash.',
+    origin: 'Multan Master Weavers',
     patternType: 'herringbone',
+    image: '/assets/aistudio/shawl_charcoal_gold_border.jpeg?v=3',
     wholesaleAvailable: true,
     wholesaleMinQty: 12,
   },
   {
     id: 'bsh-g-02',
-    code: 'BTM-G202',
-    name: 'Light Brown Shawl with Golden Leaf Border',
-    nameUrdu: 'ہلکی براؤن شال گولڈن پتی کڑھائی بارڈر کے ساتھ',
+    code: 'BSH-202',
+    name: "Men's Off-White Swati Wool Lohi Shawl",
+    nameUrdu: 'آف وائٹ سواتی اونی مردانہ لوئی شال',
     category: 'gents',
     price: 4500,
     originalPrice: 5200,
-    material: 'Pure Wool',
-    style: 'Four-Side Golden Leaf Embroidered Border & Bumble',
-    color: 'Light Brown & Gold',
-    colorHex: '#8C735B',
-    image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.32_AM__2__ea5af5ae.jpeg?v=3',
+    material: 'Swati Wool',
+    style: 'Authentic Swati Geometric Woven Pallu & Bumble Tassels',
+    color: 'Natural Off-White & Brown Border',
+    colorHex: '#F5F2EB',
+    availableColors: [
+      {
+        name: 'Natural Off-White & Brown Border',
+        nameUrdu: 'قدرتی آف وائٹ لوئی',
+        hex: '#F5F2EB',
+        image: '/assets/aistudio/shawl_offwhite_mens_lohi.jpeg?v=3',
+        inStock: true,
+      },
+      {
+        name: 'Warm Camel Desert',
+        nameUrdu: 'کیمل ڈیزرٹ',
+        hex: '#C19A6B',
+        inStock: true,
+      },
+      {
+        name: 'Natural Sheep Grey',
+        nameUrdu: 'قدرتی سلیٹی گرے',
+        hex: '#78716C',
+        inStock: true,
+      },
+      {
+        name: 'Obsidian Black Swati',
+        nameUrdu: 'سواتی سیاہ',
+        hex: '#1C1917',
+        inStock: true,
+      },
+    ],
     inStock: true,
     featured: true,
     isNew: true,
-    dimensions: '2.5 × 1.35 meters (Full Size)',
+    dimensions: '2.60 × 1.40 meters (Full Gents Lohi)',
+    weightGrams: 740,
+    warmthLevel: 'Heavy Winter',
+    rating: 4.9,
+    reviewCount: 44,
     description:
-      'Warm light brown wool shawl featuring neat golden leaf embroidery along all four sides and matching bumble tassels at the designing end. Looks graceful for daily winter wear and family invitations.',
+      'Authentic off-white men’s Swati wool Lohi shawl with a traditional earthy brown and gold geometric woven border and full hand-knotted bumble tassels at the designing ends.',
     descriptionUrdu:
-      'ہلکے براؤن رنگ کی خالص اونی گرم شال جس کے چاروں طرف سنہری پتوں کی نفیس کڑھائی اور کنارے پر بمبل لگے ہوئے ہیں۔',
-    care: 'Dry clean or gentle hand wash in cold water.',
-    origin: 'Multan Weavers',
-    patternType: 'herringbone',
+      'اصلی آف وائٹ مردانہ سواتی اونی لوئی شال جس کے پلو پر روایتی ڈیزائننگ بارڈر اور مضبوط ہاتھ سے بنی جھالر موجود ہے۔ شدید سردی کے لیے شاندار گرم شال۔',
+    care: 'Dry clean or cold hand wash; do not machine spin.',
+    origin: 'Swat & Multan Handloom',
+    patternType: 'geometric',
+    image: '/assets/aistudio/shawl_offwhite_mens_lohi.jpeg?v=3',
     wholesaleAvailable: true,
     wholesaleMinQty: 12,
   },
-  {
-    id: 'bsh-g-03',
-    code: 'BTM-G203',
-    name: 'Black Shawl with Wide Golden Woven Border',
-    nameUrdu: 'سیاہ شال چوڑے سنہری بنے ہوئے بارڈر کے ساتھ',
-    category: 'gents',
-    price: 5200,
-    originalPrice: 6000,
-    material: 'Pashmina Blend',
-    style: 'Four-Side Wide Golden Paisley Border & Bumble',
-    color: 'Jet Black & Gold',
-    colorHex: '#0F172A',
-    image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.33_AM__1__00873d76.jpeg?v=3',
-    inStock: true,
-    featured: true,
-    isNew: true,
-    dimensions: '2.55 × 1.35 meters (Full Size)',
-    description:
-      'Classic black winter shawl with a wide golden paisley woven border on the sides and bottom, finished with twisted bumble tassels at the designing end.',
-    descriptionUrdu:
-      'شاندار سیاہ رنگ کی گرم شال جس کے چاروں طرف چوڑا سنہری بارڈر اور پلو پر بمبل بنے ہوئے ہیں۔',
-    care: 'Dry clean or gentle cold hand wash.',
-    origin: 'Multan & Kashmir Craft',
-    patternType: 'paisley',
-    wholesaleAvailable: true,
-    wholesaleMinQty: 10,
-  },
 
-  // 3. Children & Youth Shawls (Bechgana - 1 Unique Design)
+  // ==========================================
+  // 3. CHILDREN'S SHAWLS / BECHGANA (بچگانہ شالیں)
+  // ==========================================
   {
     id: 'bsh-b-01',
-    code: 'BTM-B301',
-    name: 'Teal Blue & Cream Woven Design Shawl',
-    nameUrdu: 'فیروزی اور کریم بنے ہوئے ڈیزائن والی شال',
+    code: 'BSH-301',
+    name: 'Bechgana Maroon & Gold Woven Border Youth Shawl',
+    nameUrdu: 'بچگانہ میرون اور گولڈن بارڈر شال',
     category: 'bechgana',
-    price: 3500,
-    originalPrice: 4200,
+    price: 2250,
+    originalPrice: 2700,
     material: 'Soft Acrylic',
-    style: 'Full Jacquard Floral Weave with Arch Pallu & Bumble',
-    color: 'Teal Blue & Cream',
-    colorHex: '#0F766E',
-    image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.31_AM_35943193.jpeg?v=3',
+    style: 'Lightweight Non-Itchy Youth Size with Bumble Tassels',
+    color: 'Deep Maroon & Gold',
+    colorHex: '#6B1D2F',
+    availableColors: [
+      {
+        name: 'Deep Maroon & Gold',
+        nameUrdu: 'ڈیپ میرون',
+        hex: '#6B1D2F',
+        image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.31_AM_35943193.jpeg?v=3',
+        inStock: true,
+      },
+      {
+        name: 'Royal Navy Youth',
+        nameUrdu: 'رائیل نیوی بلیو',
+        hex: '#1E3A8A',
+        inStock: true,
+      },
+      {
+        name: 'Camel Fawn Youth',
+        nameUrdu: 'کیمل بادامی',
+        hex: '#B88B58',
+        inStock: true,
+      },
+      {
+        name: 'Classic Black Youth',
+        nameUrdu: 'کلاسک بلیک',
+        hex: '#18181B',
+        inStock: true,
+      },
+    ],
     inStock: true,
     featured: true,
     isNew: true,
-    dimensions: '2.1 × 1.05 meters (Medium / Youth Size)',
+    dimensions: '2.10 × 1.10 meters (Youth / Under 16 Size)',
+    weightGrams: 390,
+    warmthLevel: 'Mid-Winter',
+    rating: 4.8,
+    reviewCount: 27,
     description:
-      'Soft woven shawl in attractive teal blue and cream floral design with a traditional arch designing end and golden-cream bumble tassels at the bottom.',
+      'Specially proportioned Bechgana shawl for boys and girls under 16. Woven from feather-soft, non-itchy acrylic wool with a festive maroon and gold border and neat bumble tassels.',
     descriptionUrdu:
-      'فیروزی اور کریم رنگ کے خوبصورت بنے ہوئے ڈیزائن اور بمبل والی نرم اور آرام دہ گرم شال۔',
-    care: 'Easy hand wash at home.',
-    origin: 'Multan Weaving Unit',
-    patternType: 'geometric',
+      '15 سے 16 سال تک کے بچوں اور بچیوں کے لیے خصوصی سائز کی نرم اور آرام دہ شال۔ خارش سے پاک، ہلکی اور گرم۔',
+    care: 'Easy hand or gentle machine wash at home.',
+    origin: 'Multan Weavers',
+    patternType: 'paisley',
+    image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.31_AM_35943193.jpeg?v=3',
+    wholesaleAvailable: true,
+    wholesaleMinQty: 12,
+  },
+  {
+    id: 'bsh-b-02',
+    code: 'BSH-302',
+    name: 'Bechgana Walnut Brown Kashmiri Youth Shawl',
+    nameUrdu: 'بچگانہ اخروٹی براؤن کشمیری شال',
+    category: 'bechgana',
+    price: 2400,
+    originalPrice: 2850,
+    material: 'Pashmina Blend',
+    style: 'Youth Kashmiri Woven Pallu with Soft Fringe Ends',
+    color: 'Walnut Brown & Amber',
+    colorHex: '#5D4037',
+    availableColors: [
+      {
+        name: 'Walnut Brown & Amber',
+        nameUrdu: 'اخروٹی براؤن',
+        hex: '#5D4037',
+        image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.32_AM__2__ea5af5ae.jpeg?v=3',
+        inStock: true,
+      },
+      {
+        name: 'Charcoal Slate Youth',
+        nameUrdu: 'چارکول سلیٹی',
+        hex: '#374151',
+        inStock: true,
+      },
+      {
+        name: 'Cream Off-White Youth',
+        nameUrdu: 'آف وائٹ کریمی',
+        hex: '#F3EFE6',
+        inStock: true,
+      },
+    ],
+    inStock: true,
+    featured: true,
+    isNew: false,
+    dimensions: '2.10 × 1.15 meters (Youth / School & Event Wear)',
+    weightGrams: 410,
+    warmthLevel: 'Mid-Winter',
+    rating: 4.7,
+    reviewCount: 22,
+    description:
+      'Warm walnut-brown Bechgana shawl with a classic Kashmiri woven border and soft bumble fringe. Sized comfortably for young shoulders at family weddings, school mornings, and winter outings.',
+    descriptionUrdu:
+      'بچوں کے کندھوں کے مطابق تیار کردہ خوبصورت اخروٹی براؤن کشمیری بارڈر شال۔ شادی بیاہ اور سردیوں کی صبح کے لیے بہترین۔',
+    care: 'Gentle cold wash.',
+    origin: 'Multan Weavers',
+    patternType: 'kashmiri',
+    image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.32_AM__2__ea5af5ae.jpeg?v=3',
     wholesaleAvailable: true,
     wholesaleMinQty: 12,
   },
 
-  // 4. Rumaal & Lohi Wraps (1 Unique Design)
+  // ==========================================
+  // 4. RUMAAL (ملتانی رومال)
+  // ==========================================
   {
     id: 'bsh-r-01',
-    code: 'BTM-R401',
-    name: "Men's Off-White Swati Wool Shawl",
-    nameUrdu: 'مردانہ آف وائٹ سواتی اونی شال اور لوئی',
+    code: 'BSH-401',
+    name: 'Traditional Multani Woven Cotton Rumaal Wrap',
+    nameUrdu: 'روایتی ملتانی ہینڈ لوم کاٹن رومال',
     category: 'rumaal',
-    price: 3900,
-    originalPrice: 4600,
-    material: 'Swati Wool',
-    style: 'Fine Off-White Wool with Thin Swati Patti & Bumble',
-    color: 'Off-White & Dark Brown-Olive',
-    colorHex: '#EDE9DF',
-    image: '/assets/aistudio/shawl_offwhite_mens_lohi.jpeg?v=3',
+    price: 1450,
+    originalPrice: 1800,
+    material: 'Fine Cotton',
+    style: 'Handloom Multani Checkered & Border Weave with Tassels',
+    color: 'Earthy Crimson & Cream',
+    colorHex: '#7F1D1D',
+    availableColors: [
+      {
+        name: 'Earthy Crimson & Cream',
+        nameUrdu: 'سرخ اور کریمی چیک',
+        hex: '#7F1D1D',
+        image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.33_AM__2__0c743348.jpeg?v=3',
+        inStock: true,
+      },
+      {
+        name: 'Pure White Prayer Rumaal',
+        nameUrdu: 'سفید نماز رومال',
+        hex: '#F8FAFC',
+        inStock: true,
+      },
+      {
+        name: 'Classic Black & White Check',
+        nameUrdu: 'سیاہ و سفید چیک',
+        hex: '#1E293B',
+        inStock: true,
+      },
+      {
+        name: 'Emerald Green Prayer Wrap',
+        nameUrdu: 'سبز مدنی رومال',
+        hex: '#065F46',
+        inStock: true,
+      },
+    ],
+    inStock: true,
+    featured: true,
+    isNew: false,
+    dimensions: '1.40 × 1.40 meters (Large Square Rumaal)',
+    weightGrams: 280,
+    warmthLevel: 'All-Season',
+    rating: 4.9,
+    reviewCount: 41,
+    description:
+      'Breathable 100% pure combed cotton Multani Rumaal featuring traditional woven borders and knotted bumble tassels. Worn comfortably as a shoulder wrap, prayer cloth, or head cover in all seasons.',
+    descriptionUrdu:
+      'خالص سوتی دھاگے سے بنا ہوا روایتی ملتانی رومال جس کے کناروں پر خوبصورت بارڈر اور جھالر موجود ہے۔ نماز اور کندھے پر رکھنے کے لیے بہترین۔',
+    care: 'Machine washable in cold water; colorfast threads.',
+    origin: 'Multan Handloom Cluster',
+    patternType: 'geometric',
+    image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.33_AM__2__0c743348.jpeg?v=3',
+    wholesaleAvailable: true,
+    wholesaleMinQty: 24,
+  },
+
+  // ==========================================
+  // 5. LAUNGI (ملتانی لونگی)
+  // ==========================================
+  {
+    id: 'bsh-lg-01',
+    code: 'BSH-501',
+    name: 'Authentic Multani Handloom Striped Zari Laungi',
+    nameUrdu: 'اصلی ملتانی ہینڈ لوم زری دھاری دار لونگی',
+    category: 'laungi',
+    price: 2650,
+    originalPrice: 3200,
+    material: 'Silk Blend',
+    style: 'Traditional Multani Banded Stripe Weave with Fringe Ends',
+    color: 'Royal Crimson, Gold & Indigo Stripes',
+    colorHex: '#881337',
+    availableColors: [
+      {
+        name: 'Royal Crimson, Gold & Indigo Stripes',
+        nameUrdu: 'شاہی سرخ و سنہری دھاری دار',
+        hex: '#881337',
+        image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.35_AM_b669c711.jpeg?v=3',
+        inStock: true,
+      },
+      {
+        name: 'Emerald Green & Gold Zari',
+        nameUrdu: 'زمرد سبز و گولڈن زری',
+        hex: '#065F46',
+        inStock: true,
+      },
+      {
+        name: 'Indigo Blue & Silver Stripe',
+        nameUrdu: 'نیلا اور چاندی دھاری دار',
+        hex: '#1E3A8A',
+        inStock: true,
+      },
+      {
+        name: 'Classic Brown & Mustard Cotton',
+        nameUrdu: 'براؤن اور مسٹرڈ سوتی لونگی',
+        hex: '#78350F',
+        inStock: true,
+      },
+    ],
     inStock: true,
     featured: true,
     isNew: true,
-    dimensions: '2.45 × 1.3 meters (Full Wrap Size)',
+    dimensions: '2.50 × 1.30 meters (Full Traditional Size)',
+    weightGrams: 360,
+    warmthLevel: 'All-Season',
+    rating: 4.9,
+    reviewCount: 36,
     description:
-      'Authentic men’s off-white Swati wool shawl and Lohi finished with a fine dark-brown and olive geometric Swati woven border strip, thin double-line stripe, and soft off-white wool bumble tassels at the designing end.',
+      'Authentic Multani handloom Laungi woven with rich heritage stripes, metallic Zari border bands, and hand-tied bumble tassels. A prized traditional garment for cultural festivities, dastarbandi, and daily wear.',
     descriptionUrdu:
-      'اصلی مردانہ آف وائٹ سواتی اونی شال اور لوئی، باریک روایتی سواتی بارڈر پٹی اور سفید اونی بمبل کے ساتھ۔',
-    care: 'Gentle hand wash in cold water.',
-    origin: 'Multan & Swat Traditional Handloom',
-    patternType: 'herringbone',
+      'ملتان کی مشہور ہاتھ کی کھڈی پر تیار کردہ روایتی دھاری دار زری لونگی۔ ثقافتی تقریبات، دستار بندی اور روزمرہ استعمال کے لیے اعلیٰ معیار۔',
+    care: 'Gentle hand wash in cold water; iron on low heat.',
+    origin: 'Old Multan Khaddi Looms',
+    patternType: 'laungi-stripe',
+    image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.35_AM_b669c711.jpeg?v=3',
     wholesaleAvailable: true,
     wholesaleMinQty: 12,
   },
+];
 
-  // 5. Laungi & Striped Wraps (1 Unique Design)
+export const INITIAL_REVIEWS: Record<string, ProductReview[]> = {
+  'bsh-l-01': [
+    {
+      id: 'rev-1',
+      author: 'Ayesha Tariq',
+      city: 'Lahore',
+      rating: 5,
+      date: '2 days ago',
+      comment:
+        'Ordered the Crimson Red & Gold for my sister’s Valima. The Kashmiri embroidery and bumble tassels on the pallu look even richer in person than in the photos!',
+      verifiedColor: 'Crimson Red & Gold',
+    },
+    {
+      id: 'rev-2',
+      author: 'Haji Muhammad Nadeem',
+      city: 'Multan',
+      rating: 5,
+      date: '1 week ago',
+      comment:
+        'Visited Dukaan No. 44 in Makki Block and also ordered 3 pieces online for family. Pure winter warmth and genuine wholesale market pricing.',
+      verifiedColor: 'Royal Bridal Maroon',
+    },
+  ],
+  'bsh-g-01': [
+    {
+      id: 'rev-3',
+      author: 'Malik Farooq Ahmed',
+      city: 'Islamabad',
+      rating: 5,
+      date: '3 days ago',
+      comment:
+        'The Charcoal Grey wool shawl has a very graceful fall over Shalwar Kameez and waistcoat. Delivered to Islamabad in 2 days with Cash on Delivery.',
+      verifiedColor: 'Charcoal Grey & Gold',
+    },
+    {
+      id: 'rev-4',
+      author: 'Zوهیب الحسن (Zohaib)',
+      city: 'Faisalabad',
+      rating: 5,
+      date: '2 weeks ago',
+      comment:
+        'Ordered both Charcoal Grey and Camel Brown. Heavy winter weave and neat hand-knotted bumble ends.',
+      verifiedColor: 'Camel Brown & Gold',
+    },
+  ],
+  'bsh-g-02': [
+    {
+      id: 'rev-5',
+      author: 'Sardar Kamran Khan',
+      city: 'Peshawar',
+      rating: 5,
+      date: '4 days ago',
+      comment:
+        'Real Swati wool Lohi with proper geometric border and full length (2.60m). Very warm for December and January nights.',
+      verifiedColor: 'Natural Off-White & Brown Border',
+    },
+  ],
+};
+
+export const DEFAULT_PRODUCT_REVIEWS: ProductReview[] = [
   {
-    id: 'bsh-lg-01',
-    code: 'BTM-L501',
-    name: 'Black Shawl with Colorful Striped Border',
-    nameUrdu: 'سیاہ شال رنگ برنگے دھاری دار بارڈر کے ساتھ',
-    category: 'laungi',
-    price: 3800,
-    originalPrice: 4500,
-    material: 'Soft Acrylic',
-    style: 'Multi-Color Woven Stripes & Colorful Bumble Tassels',
-    color: 'Black with Multi-Color Border',
-    colorHex: '#1E293B',
-    image: '/assets/aistudio/WhatsApp_Image_2026-10-24_at_5.13.35_AM_b669c711.jpeg?v=3',
-    inStock: true,
-    featured: true,
-    isNew: true,
-    dimensions: '2.4 × 1.15 meters (Full Length)',
-    description:
-      'Stylish jet-black winter shawl and wrap finished with bright red, blue, green, and white striped edges and colorful bumble tassels at the designing end.',
-    descriptionUrdu:
-      'کالے رنگ کی دلکش گرم شال جس کے کناروں پر خوبصورت رنگ برنگی پٹیاں اور بمبل لگے ہوئے ہیں۔',
-    care: 'Easy hand wash in cold water.',
-    origin: 'Multan Master Handlooms',
-    patternType: 'laungi-stripe',
-    wholesaleAvailable: true,
-    wholesaleMinQty: 12,
+    id: 'rev-def-1',
+    author: 'Mian Usman Ghani',
+    city: 'Multan',
+    rating: 5,
+    date: '5 days ago',
+    comment:
+      'Authentic Multan Wholesale Market quality from Bari Shawl House. Fast delivery, neat packaging, and exact color as selected.',
+  },
+  {
+    id: 'rev-def-2',
+    author: 'Fatima Zahra',
+    city: 'Lahore',
+    rating: 5,
+    date: '2 weeks ago',
+    comment:
+      'Soft fabric, neat border finishing with full bumble tassels, and very reasonable price compared to big retail malls.',
   },
 ];
 
 export const CATEGORY_INFO = [
   {
     id: 'all',
-    name: 'All Products',
+    name: 'All Collections',
     nameUrdu: 'تمام ورائٹی',
-    description: 'Browse all 10 unique shawl designs in easy English wording with real fabric photos.',
-    count: 10,
-  },
-  {
-    id: 'ladies',
-    name: "Ladies’ Shawls",
-    nameUrdu: 'زنانی شالیں',
-    description: 'Red floral wedding shawls, light green maroon border shawls, golden beige floral shawls, and black zari border shawls.',
-    count: 4,
+    subtitle: 'Complete Catalog',
+    description: 'Browse all Gents, Ladies, and Bechgana shawls, Rumaal, and Laungi.',
   },
   {
     id: 'gents',
-    name: "Gents’ Shawls",
+    name: 'Gents’ Shawls',
     nameUrdu: 'مردانہ شالیں',
-    description: 'Charcoal grey golden border wool shawls, light brown golden leaf shawls, and black wide golden border shawls.',
-    count: 3,
+    subtitle: 'Pure Wool, Swati & Pashmina',
+    description:
+      'Dignified winter shawls for men in pure wool, Swati borders, and fine herringbone weaves.',
+  },
+  {
+    id: 'ladies',
+    name: 'Ladies’ Shawls',
+    nameUrdu: 'زنانی شالیں',
+    subtitle: 'Velvet, Kashmiri & Bridal',
+    description:
+      'Embroidered micro-velvet, Kashmiri floral wool, and soft daily winter shawls for women.',
   },
   {
     id: 'bechgana',
-    name: "Children & Youth Shawls",
-    nameUrdu: 'بچگانہ اور نوجوانوں کی شالیں',
-    description: 'Soft teal blue and cream woven design shawls in comfortable medium size.',
-    count: 1,
+    name: 'Bechgana (Children’s)',
+    nameUrdu: 'بچگانہ شالیں',
+    subtitle: 'Youth Sizes (Under 16 Years)',
+    description:
+      'Soft, non-itchy, and lightweight warm shawls specially proportioned for boys and girls.',
   },
   {
     id: 'rumaal',
-    name: 'Lohi & Rumaal Wraps',
-    nameUrdu: 'لوئی اور رومال شال',
-    description: 'Traditional off-white pure wool Lohi and shoulder wraps with thin woven borders.',
-    count: 1,
+    name: 'Rumaal',
+    nameUrdu: 'ملتانی رومال',
+    subtitle: 'Woven & Prayer Wraps',
+    description:
+      'Traditional Multani checkered cotton rumaals and serene prayer wraps with fine borders.',
   },
   {
     id: 'laungi',
-    name: 'Striped Border & Laungi',
-    nameUrdu: 'دھاری دار شال اور لونگی',
-    description: 'Black shawls and wraps with bright multi-color woven striped borders and tassels.',
-    count: 1,
+    name: 'Laungi',
+    nameUrdu: 'ملتانی لونگی',
+    subtitle: 'Handloom Cultural Wraps',
+    description:
+      'Authentic Multani handloom striped and Zari-bordered traditional laungis.',
   },
-];
+] as const;
 
-/**
- * Creates pre-composed WhatsApp message URL for a single product
- */
-export function buildWhatsAppProductUrl(product: Product, quantity = 1): string {
-  const message = `Assalam-o-Alaikum Bari Textile Multan!
-I want to order / ask about this item:
-*Product:* ${product.name}
-*Item Code:* ${product.code}
-*Price:* Rs. ${product.price.toLocaleString()}
-*Quantity:* ${quantity}
-*Fabric:* ${product.material} (${product.color})
+export function buildWhatsAppProductUrl(
+  product: Product,
+  quantity = 1,
+  selectedColor?: ProductColorOption
+): string {
+  const chosenColor = selectedColor?.name || product.color;
+  const text = `Assalam-o-Alaikum *Bari Shawl House*!
+I would like to order this item:
 
-Please tell me if it is available and how to get delivery. Thank you!`;
+• *Item:* ${product.name} (${product.nameUrdu})
+• *Item Code:* ${product.code}
+• *Category:* ${product.category.toUpperCase()}
+• *Selected Color:* ${chosenColor}
+• *Fabric:* ${product.material}
+• *Price:* Rs. ${product.price.toLocaleString()}
+• *Quantity:* ${quantity}
+• *Total:* Rs. ${(product.price * quantity).toLocaleString()}
 
-  return `https://wa.me/${SHOP_INFO.whatsappIntl}?text=${encodeURIComponent(message)}`;
+Please confirm availability and delivery details.`;
+
+  return `https://wa.me/${SHOP_INFO.whatsappIntl}?text=${encodeURIComponent(text)}`;
 }
 
 export function buildWhatsAppCartUrl(
-  items: { product: Product; quantity: number }[],
-  form?: { fullName: string; city: string; address: string; phone: string; paymentMethod?: string }
+  items: { product: Product; quantity: number; selectedColor?: ProductColorOption }[],
+  customer?: {
+    fullName: string;
+    phone: string;
+    city: string;
+    address: string;
+    paymentMethod: string;
+  },
+  discountAmount = 0
 ): string {
-  const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  const shipping = subtotal >= 5000 || subtotal === 0 ? 0 : 250;
-  const total = subtotal + shipping;
+  const lines = items.map(
+    (item, idx) =>
+      `${idx + 1}. *${item.product.name}* (${item.product.code}) — Color: ${
+        item.selectedColor?.name || item.product.color
+      } × ${item.quantity} = Rs. ${(item.product.price * item.quantity).toLocaleString()}`
+  );
+  const subtotal = items.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
+  const afterDiscount = Math.max(0, subtotal - discountAmount);
+  const shipping = afterDiscount >= 5000 ? 0 : 250;
+  const total = afterDiscount + shipping;
 
-  const itemsList = items
-    .map(
-      (i, idx) =>
-        `${idx + 1}. ${i.product.name} (${i.product.code}) × ${i.quantity} = Rs. ${(
-          i.product.price * i.quantity
-        ).toLocaleString()}`
-    )
-    .join('\n');
+  let text = `Assalam-o-Alaikum *Bari Shawl House*!
+*New Online Order Request:*
 
-  let customerBlock = '';
-  if (form && form.fullName) {
-    const paymentLabel =
-      form.paymentMethod === 'bank_transfer'
-        ? `Bank Transfer / JazzCash / EasyPaisa (Meezan A/C: ${SHOP_INFO.bankAccountNumber} | JazzCash/EasyPaisa: ${SHOP_INFO.jazzCashDisplay})`
-        : form.paymentMethod === 'whatsapp'
-        ? 'WhatsApp Assisted Order'
-        : 'Cash on Delivery (COD)';
-    customerBlock = `\n\n*Customer Delivery Details:*
-Name: ${form.fullName}
-Phone: ${form.phone}
-City: ${form.city}
-Address: ${form.address}
-Payment: ${paymentLabel}`;
+${lines.join('\n')}
+
+• *Subtotal:* Rs. ${subtotal.toLocaleString()}${
+    discountAmount > 0 ? `\n• *Bundle Discount:* -Rs. ${discountAmount.toLocaleString()}` : ''
+  }
+• *Delivery Charges:* ${shipping === 0 ? 'FREE' : `Rs. ${shipping}`}
+• *Grand Total:* *Rs. ${total.toLocaleString()}*`;
+
+  if (customer && customer.fullName) {
+    text += `
+
+*Customer Delivery Details:*
+• *Name:* ${customer.fullName}
+• *Phone:* ${customer.phone}
+• *City:* ${customer.city}
+• *Address:* ${customer.address}
+• *Payment Method:* ${customer.paymentMethod.toUpperCase()}`;
   }
 
-  const message = `Assalam-o-Alaikum Bari Textile Multan!
-I would like to place this order:
-
-${itemsList}
-
-*Items Total:* Rs. ${subtotal.toLocaleString()}
-*Delivery Charges:* ${shipping === 0 ? 'FREE Delivery' : 'Rs. 250'}
-*Grand Total:* Rs. ${total.toLocaleString()}${customerBlock}
-
-Please confirm my order. Thank you!`;
-
-  return `https://wa.me/${SHOP_INFO.whatsappIntl}?text=${encodeURIComponent(message)}`;
+  return `https://wa.me/${SHOP_INFO.whatsappIntl}?text=${encodeURIComponent(text)}`;
 }
 
 export function buildWhatsAppWholesaleUrl(inquiry: {
@@ -430,18 +876,16 @@ export function buildWhatsAppWholesaleUrl(inquiry: {
   quantity: string;
   requirements: string;
 }): string {
-  const message = `Assalam-o-Alaikum Bari Textile Multan!
-*Wholesale / Bulk Order Inquiry:*
+  const text = `Assalam-o-Alaikum *Bari Shawl House*!
+*Wholesale / Bulk Rate Inquiry (Makki Block Multan):*
 
-*Shop / Business Name:* ${inquiry.businessName}
-*Customer Name:* ${inquiry.contactPerson}
-*Phone Number:* ${inquiry.phone}
-*City:* ${inquiry.city}
-*Category:* ${inquiry.category}
-*Quantity Needed:* ${inquiry.quantity} pieces
-*Details:* ${inquiry.requirements || 'Please share wholesale rates and photos'}
+• *Business / Shop Name:* ${inquiry.businessName}
+• *Contact Person:* ${inquiry.contactPerson}
+• *Phone:* ${inquiry.phone}
+• *City:* ${inquiry.city}
+• *Interested Category:* ${inquiry.category}
+• *Estimated Quantity:* ${inquiry.quantity} pieces
+• *Notes:* ${inquiry.requirements || 'Please share wholesale catalog & bulk rates.'}`;
 
-Please send me your wholesale price list.`;
-
-  return `https://wa.me/${SHOP_INFO.whatsappIntl}?text=${encodeURIComponent(message)}`;
+  return `https://wa.me/${SHOP_INFO.whatsappIntl}?text=${encodeURIComponent(text)}`;
 }
